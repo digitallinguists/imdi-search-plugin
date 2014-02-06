@@ -1,0 +1,112 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: IMDI Search Plugin\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2014-02-06 15:55+0100\n"
+"PO-Revision-Date: 2014-02-06 15:58+0100\n"
+"Last-Translator: Marcel\n"
+"Language-Team: CCeH <mschab0@smail.uni-koeln.de>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Language: de_DE\n"
+"X-Generator: Poedit 1.6.3\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"X-Poedit-SourceCharset: UTF-8\n"
+
+#: IMDI_Search_Plugin.php:121 IMDI_Search_Plugin.php:122
+msgid "An unknown error occurred. Please try again!"
+msgstr "Ein unbekannter Fehler ist aufgetreten. Bitte nochmals versuchen."
+
+#: IMDI_Search_Plugin.php:123 IMDI_Search_Plugin.php:124
+msgid "Searching the archive..."
+msgstr "Suche im Archiv..."
+
+#: IMDI_Search_Plugin.php:180 IMDI_Search_Plugin.php:181
+msgid "Input"
+msgstr "Suche"
+
+#: IMDI_Search_Plugin.php:182 IMDI_Search_Plugin.php:183
+msgid "Search the Archive"
+msgstr "Das Archiv durchsuchen"
+
+#: IMDI_Search_Plugin.php:183 IMDI_Search_Plugin.php:184
+msgid "Results"
+msgstr "Gefundene Sitzungen"
+
+#: IMDI_Search_Plugin.php:342 IMDI_Search_Plugin.php:361
+msgid "No search term was entered..."
+msgstr "Kein Suchbegriff eingegeben..."
+
+#: IMDI_Search_Plugin.php:383 IMDI_Search_Plugin.php:402
+msgid "No results"
+msgstr "Keine Ergebnisse"
+
+#: IMDI_Search_Plugin.php:410 IMDI_Search_Plugin.php:429
+msgid "Get ocurrences: no path"
+msgstr ""
+
+#: IMDI_Search_Plugin.php:971 IMDI_Search_Plugin.php:990
+msgid "Access level 1: openly accessible"
+msgstr "Access level 1: frei verfügbar"
+
+#: IMDI_Search_Plugin.php:974 IMDI_Search_Plugin.php:993
+msgid "Access level 2: accessible to registered users"
+msgstr "Access level 2: verfügbar für registrierte Benutzer"
+
+#: IMDI_Search_Plugin.php:977 IMDI_Search_Plugin.php:996
+msgid "Access level 3: access can be requested"
+msgstr "Access level 3: Zugriff muss angefordert werden"
+
+#: IMDI_Search_Plugin.php:980 IMDI_Search_Plugin.php:999
+msgid "Access level 4: not accessible"
+msgstr "Access level 4: nicht verfügbar"
+
+#: IMDI_Search_Plugin.php:182
+msgid "Type your search term here"
+msgstr "Hier Suchbegriff eingeben"
+
+#: IMDI_Search_Plugin.php:185
+msgid "Categories"
+msgstr "Kategorien"
+
+#: IMDI_Search_Plugin.php:186
+msgid "Fulltext search"
+msgstr "Volltextsuche"
+
+#: IMDI_Search_Plugin.php:187
+msgid "Advanced search"
+msgstr "Erweiterte Suche"
+
+#: IMDI_Search_Plugin.php:209
+msgid "search"
+msgstr "suche"
+
+#: IMDI_Search_Plugin.php:222
+msgid "Project"
+msgstr "Projekt"
+
+#: IMDI_Search_Plugin.php:223
+msgid "Country"
+msgstr "Land"
+
+#: IMDI_Search_Plugin.php:224
+msgid "Languages"
+msgstr "Sprachen"
+
+#: IMDI_Search_Plugin.php:225
+msgid "File"
+msgstr "Datei"
+
+#: IMDI_Search_Plugin.php:226
+msgid "Go back to search results"
+msgstr "Zurück zu den Suchergebnissen"
+
+#: IMDI_Search_Plugin.php:308
+msgid "No media type specified in shortcode"
+msgstr "Kein Medientyp im Shortcode angegeben"

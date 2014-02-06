@@ -1,0 +1,8 @@
+<div id="{{category}}" style="float: left;">
+	<p><b>{{category}}</b></p>
+	<ul>
+		{{# occurrences}}
+			<li><a href='{{href}}'>{{name}} {{# count}} ({{ . }}) {{/ count}}</a></li>
+		{{/ occurrences}}
+	</ul>
+</div>

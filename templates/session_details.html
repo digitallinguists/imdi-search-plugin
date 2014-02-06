@@ -1,0 +1,54 @@
+<!-- display details about one session -->
+
+<div class="session">
+	<div class="detailtabs">
+		<ul class="">
+			{{# country}}
+				<li class="infoCountry"> 
+			 	<a href="#{{name}}_tabCountry"><img alt="Country" src="/images/map_marker-25.png" /> {{ . }}</a></li>
+			 {{/country}}
+			{{# languages}}
+				<li class="infoLanguages"> <span class="info_content"><a href="#{{name}}_tabLanguages"><img alt="Language" src=/images/speech_bubble-25.png />{{ . }}</a></span></li>
+			{{/ languages}}
+			{{# project}}
+				<li class="infoProject"><span class="info_content"><a href="#{{name}}_tabProject"><img alt="Project" src=/images/opened_folder-25.png />{{ . }}</a></span></li>
+			{{/ project}}
+		</ul>
+		{{# country }}
+			<div id="{{name}}_tabCountry">
+				<p><b>Continent:</b> {{continent}}<br />
+				<b>Region:</b> {{region}}<br />
+				<b>Address:</b> {{address}}</p>
+				<div id="{{name}}_map" class="map"></div>
+			</div>
+		{{/ country }}
+		{{# languages}}
+			<div id="{{name}}_tabLanguages">		
+			</div>
+		{{/ languages}}
+		{{# project}}
+			<div id="{{name}}_tabProject">
+				<b>{{project_title}}</b>
+				<p>{{project_desc}}</p>
+				<p><b>Contact</b><br />
+				{{project_contact_name}}<br />
+				{{project_contact_organisation}}</p>
+				<p>{{project_contact_address}}<br />
+				{{project_contact_email}}</p>
+			</div>
+		{{/ project }}				
+	</div>
+	<div class="details">
+		<h3>{{title}}</h3>
+		<p>{{description}}</p>
+		<ul>
+			{{# resources}}
+				{{&.}}
+			{{/ resources}}
+		</ul>
+		<div id="toggle-save">
+			<p>{{saved_text}} speichern</p>
+			<input type="hidden" id="imdi_session_url" value="{{imdi_session_url}}" />
+		</div>
+	</div>
+</div>
