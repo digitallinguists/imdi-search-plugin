@@ -1,0 +1,1 @@
+xgettext   --from-code=UTF-8  -L PHP -k__ -IMDI_Search_Plugin.php

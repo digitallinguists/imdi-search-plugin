@@ -1,0 +1,15 @@
+<div id="imdi-archive-search-plugin-query">
+	<form id="imdi-search-form">
+		<div id="search-area">
+			<h3>{{inputTitle}}</h3>
+			<input type="text" id="imdi-query-value" size="25" name="imdi-query-value" value="" placeholder="{{placeholderText}}" />
+			<input type="submit" id="query-api" href="#" value="{{submitButtonText}}" />
+		</div>
+	</form>
+	<div id="results-area">
+		<h3>{{resultsTitle}}</h3>
+		<div class="search-results" />
+	</div>
+</div>
+			
+			

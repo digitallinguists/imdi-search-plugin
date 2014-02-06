@@ -1,0 +1,644 @@
+<?php
+/*
+Plugin Name: IMDI Archive Search Plugin CCeH 
+Plugin URI: http://tla.mpi.nl
+Description: Searching in an IMDI archive via the REST API (Ajax version).
+Author: Paul Trilsbeek & Alex König
+Author URI: http://tla.mpi.nl
+Version: 0.1.0-cceh
+License: GNU General Public License v2.0 or later
+License URI: http://www.opensource.org/licenses/gpl-license.php
+*/
+
+/*
+	Using Thomas Griffin's Sample Ajax Plugin as a template.
+
+	This program is free software; you can redistribute it and/or modify
+	it under the terms of the GNU General Public License, version 2, as
+	published by the Free Software Foundation.
+
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+	GNU General Public License for more details.
+
+	You should have received a copy of the GNU General Public License
+	along with this program; if not, write to the Free Software
+	Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+*/
+
+/**
+ * IMDI Archive Search plugin class.
+ *
+ * @since 0.1.0
+ *
+ * @package	IMDI Archive Search Plugin
+ * @author	Paul Trilsbeek & Alex König
+ */
+ 
+
+// Initialize mustache template engine
+require 'mustache.php/src/Mustache/Autoloader.php';
+Mustache_Autoloader::register();
+
+
+ 
+$_opt_imdi_query = 'st_imdi_query';
+$_opt_imdi_field = 'st_imdi_field';
+$_opt_imdi_topnode = 'st_imdi_topnode';
+$_opt_imdi_archive_url = 'st_imdi_archive_url';
+$_opt_imdi_servlet_url = 'st_imdi_servlet_url';
+$_opt_imdi_max_results = 'st_imdi_max_results';
+
+add_action('admin_menu', 'add_imdisearch_options');
+
+
+// Options hook
+function add_imdisearch_options() {
+    if (function_exists('add_options_page')) {
+		add_options_page('Imdi Archive Search', 'Imdi Archive Search', 8, 'imdisearch', 'imdisearch_options_subpanel');
+    }
+}
+
+// Options panel and form processing
+function imdisearch_options_subpanel() {
+	echo "<h2>IMDI Archive Search Options</h2>";
+        if (isset($_POST['info_update'])) {
+		global $_opt_imdi_archive_url;
+                global $_opt_imdi_servlet_url;
+                global $_opt_imdi_field;
+                global $_opt_imdi_topnode;
+		global $_opt_imdi_max_results;
+
+                $the_archive_url = $_POST['imdi_archive_url'];
+		$the_servlet_url = $_POST['imdi_servlet_url'];
+                $the_field = $_POST['imdi_query_field'];
+                $the_topnode = $_POST['imdi_query_topnode'];
+		$the_max_results = $_POST['imdi_max_results'];
+
+                update_option($_opt_imdi_field, $the_field);
+                update_option($_opt_imdi_topnode, $the_topnode);
+		update_option($_opt_imdi_max_results, $the_max_results);
+                update_option($_opt_imdi_servlet_url, $the_servlet_url);
+		update_option($_opt_imdi_archive_url, $the_archive_url);
+        }
+        _show_imdisearch_form();
+}
+
+function _show_imdisearch_form() {
+	?>
+<div class="wrap">
+<form method="post">
+<fieldset class="options">
+<legend><?php _e('Setup') ?></legend>
+<table width="100%" cellspacing="2" cellpadding="5" class="editform">
+<tr valign="top">
+<th scope="row"><label for="imdi_archive_url"><?php _e('URL of the IMDI archive:') ?></label></th>
+<td><input type="text" name="imdi_archive_url" id="imdi_archive_url" size="50" value="<?php form_option('st_imdi_archive_url'); ?>"/></td>
+</tr>
+<tr valign="top">
+<th scope="row"><label for="imdi_servlet_url"><?php _e('URL of the IMDI search servlet:') ?></label></th>
+<td><input type="text" name="imdi_servlet_url" id="imdi_servlet_url" size="50" value="<?php form_option('st_imdi_servlet_url'); ?>"/></td> 
+</tr>
+<tr valign="top">
+<th scope="row"><label for="imdi_query_field"><?php _e('Default IMDI field to search through for advanced search (e.g. Session.Name):') ?></label></th>
+<td><input type="text" name="imdi_query_field" id="imdi_query_field" value="<?php form_option('st_imdi_field'); ?>"/></td> 
+</tr> 
+<tr valign="top">
+<th scope="row"><label for="imdi_query_topnode"><?php _e('Return all results below node #:') ?></label></th>
+<td><input type="text" name="imdi_query_topnode" id="imdi_query_topnode" size="7" value="<?php form_option('st_imdi_topnode'); ?>"/></td> 
+</tr>
+<tr valign="top">
+<th scope="row"><label for="imdi_max_results"><?php _e('Maximum number of search results to return:') ?></label></th>
+<td><input type="text" name="imdi_max_results" id="imdi_max_results" size="7" value="<?php form_option('st_imdi_max_results'); ?>"/></td>
+</tr>
+</table> 
+<p class="submit">
+<input type="submit" name="info_update" value="<?php _e('Update Options') ?> &raquo;" />
+</p>
+</fieldset>
+</form>
+</div>
+	<?php
+}
+
+ 
+class IMDI_Search_Plugin {
+
+	/**
+	 * Holds a copy of the object for easy reference.
+	 *
+	 * @since 0.1.0
+	 *
+	 * @var object
+	 */
+	public static $instance;
+
+	/**
+	 * Constructor. Hooks all interactions and such for the class.
+	 *
+	 * @since 0.1.0
+	 */
+	public function __construct() {
+
+		/** Store the object in a static prop	erty */
+		self::$instance = $this;
+
+		/** Hook everything into the plugins_loaded hook */
+		add_action( 'plugins_loaded', array( $this, 'init' ) );
+		
+		/** Handle our AJAX submissions */
+		add_action( 'wp_ajax_search_IMDI_archive', array( $this, 'ajax' ) );
+		add_action( 'wp_ajax_nopriv_search_IMDI_archive', array( $this, 'ajax' ) );
+
+	}
+	
+	/**
+	 * Loads all the stuff to make the plugin run.
+	 *
+	 * @since 0.1.0
+	 */
+	public function init() {
+	
+		/** Load the plugin textdomain for internationalizing strings */
+		load_plugin_textdomain( 'imdi-archive-search-plugin', false, dirname( plugin_basename( __FILE__ ) ) . '/languages/' );
+		
+		add_action( 'wp_enqueue_scripts', array( $this, 'scripts' ) );
+		add_shortcode( 'imdi-archive-search-plugin', array( $this, 'shortcode' ) );
+		add_shortcode( 'imdi-archive-simplesearch', array( $this, 'shortcode_simplesearch'));
+	}
+	
+	/**
+	 * Registers the scripts and styles for the plugin.
+	 *
+	 * @since 0.1.0
+	 */
+	public function scripts() {
+	
+		/** Register and localize our script - we will enqueue it later */
+		wp_register_script( 'imdi-archive-search-plugin', plugins_url( '/js/ajax.js', __FILE__ ), array( 'jquery' ), '0.1.0', true );
+		$args = array(
+			'error'		=> __( 'An unknown error occurred. Please try again!', 'imdi-archive-search-plugin' ),
+			'nonce'		=> wp_create_nonce( 'imdi-archive-search-plugin-nonce' ),
+			'searching'	=> __( 'Searching the archive...', 'imdi-archive-search-plugin' ),
+			'spinner'	=> admin_url( 'images/loading.gif' ),
+			'url'		=> admin_url( 'admin-ajax.php' )
+		);
+		wp_localize_script( 'imdi-archive-search-plugin', 'imdi_archive_search_plugin_object', $args );
+		
+		/** Register our style */
+		wp_register_style( 'imdi-archive-search-plugin', plugins_url( '/css/style.css', __FILE__ ) );
+	
+	}
+	
+	/**
+	 * Outputs the shortcode for the plugin.
+	 *
+	 * @since 0.1.0
+	 */
+	public function shortcode() {
+	
+		/** Enqueue our scripts and styles */
+		wp_enqueue_script( 'imdi-archive-search-plugin' );
+		wp_enqueue_style( 'imdi-archive-search-plugin' );
+		
+		$m = new Mustache_Engine(array(
+    		'loader' => new Mustache_Loader_FilesystemLoader(dirname(__FILE__) . '/templates', array('extension' => '.html')),
+		));
+		$output =  $m->render('simple_query', array('inputTitle' => __( 'Input', 'imdi-archive-search-plugin' ),
+													'placeholderText' => esc_attr__( 'Type your search term here', 'imdi-archive-search-plugin' ),
+													'submitButtonText' => __( 'Search the Archive', 'imdi-archive-search-plugin' ),
+													'resultsTitle' => __( 'Results', 'imdi-archive-search-plugin' )));
+
+		$output .= "<script type='text/javascript'> var _POST = " . (!empty($_POST)?json_encode($_POST):'null') ."; </script>";
+ 
+
+		return $output;
+	
+	}
+
+	public function shortcode_simplesearch() {
+
+		$m = new Mustache_Engine(array(
+    		'loader' => new Mustache_Loader_FilesystemLoader(dirname(__FILE__) . '/templates', array('extension' => '.html')),
+		));
+
+		/** Enqueue our scripts and styles */
+		wp_enqueue_script( 'imdi-archive-search-plugin' );
+		wp_enqueue_style( 'imdi-archive-search-plugin' );
+
+		return $m->render('simplesearch', array());
+	}
+
+	/**
+	 * Handles the AJAX request for getting plugin data from the WordPress Plugin API.
+	 *
+	 * @since 0.1.0
+	 */
+	public function ajax() {
+	
+		/** Do a security check first */
+		check_ajax_referer( 'imdi-archive-search-plugin-nonce', 'nonce' );
+	
+		/** Get servlet URL and topnode from plugin options */	
+		global $_opt_imdi_servlet_url;
+		global $_opt_imdi_topnode;
+		global $_opt_imdi_max_results;
+
+    		$query_topnode = get_option($_opt_imdi_topnode);
+    		$servlet_url = get_option($_opt_imdi_servlet_url);
+		$max_results = get_option($_opt_imdi_max_results);		
+
+		/** Die early if there is no search term to look for */
+		if ( ! isset( $_GET['query'] ) || isset( $_GET['query'] ) && empty( $_GET['query'] ) )
+			die( __( 'No search term was entered!', 'imdi-archive-search-plugin' ) );
+		
+		/** Now that we are verified, let's make our request to get the data */
+		if ( ! class_exists( 'WP_Http' ) )
+			require( ABSPATH . WPINC . '/class-http.php' );
+		
+		/** Args we want to send to the plugin API (the request must be an object) */	
+		$query_term = (stripslashes( $_GET['query']));
+			
+		$query_string = $servlet_url . 
+			'?action=getMatches&first=0&last='
+			. $max_results . 
+			'&query=' 
+			. $query_term . 
+			'&type=simple&nodeid=MPI'
+			. $query_topnode .  
+			'%23&returnType=xml&includeUrl=true&includeTitle=true&includeResources=true';
+			
+		$request = wp_remote_get( 
+			$query_string,
+				array(
+				'timeout'	=> 200)
+				);
+
+		$response_code 	= wp_remote_retrieve_response_code( $request );
+		$response_body 	= wp_remote_retrieve_body( $request );
+		$response_xml = simplexml_load_string( $response_body );
+			
+		/** Bail out early if there are any errors */
+		if ( 200 != $response_code || is_wp_error( $response_xml ) || is_null( $response_xml ) )
+			die( __( 'No results.', 'imdi-archive-search-plugin' ) );
+				
+		/** Calling function to generate the response output from the returned xml */		
+		$response = generate_response_output( $response_xml );
+		
+		/** Send the response back to our script and die */
+		echo json_encode( $response );
+		die;
+	
+	}
+	
+	
+	/**
+	 * Getter method for retrieving the object instance.
+	 *
+	 * @since 0.1.0
+	 */
+	public static function get_instance() {
+	
+		return self::$instance;
+	
+	}
+	
+}
+
+function generate_response_output ($xml) {
+	$no_of_results = $xml->Result->MatchCount;
+    if ($no_of_results > 0)
+    {
+	$match_list = array();
+        foreach ($xml->Result->Match as $match)
+        {
+	    $a_match = new Match((string)$match->Name,(string)$match->Title,(string)$match->URL,(string)$match->AccessLevel);
+
+            foreach ($match->Resource as $res)
+		{
+            if ( $show_only_accessible == false )
+            	 {	
+            	 $a_res = new Resource((string) $res->Name,(string) $res->Format,(string) $res->URL,(string) $res->AccessLevel);
+				 $a_match->add_resource($a_res);
+				 echo $a_match->resouces->name;
+				 }
+            else 
+				 {
+					if (is_accessible($res->URL))
+						{
+						$a_res = new Resource((string) $res->Name,(string) $res->Format,(string) $res->URL,(string) $res->AccessLevel);
+						$a_match->add_resource($a_res);
+						echo $a_match->resouces->name;
+                		}
+            		}
+				 }    
+	if (!empty($a_match->resources))
+	   {
+		  $match_list[] = $a_match;
+	   }
+	}
+	output_matches($match_list);
+    }
+    else
+    {
+        echo __('no results');
+    }
+	}
+	
+	function output_matches($matches) {
+
+				$m = new Mustache_Engine(array(
+    		'loader' => new Mustache_Loader_FilesystemLoader(dirname(__FILE__) . '/templates', array('extension' => '.html')),
+		));
+
+		$results = array();
+
+	 foreach ($matches as $one_match)
+        {
+            $session_counter++;
+            $a['name'] = $one_match->name;
+            $imdi_session_title = $one_match->title;
+	    	$imdi_session_url = $one_match->url;
+	    	echo "<span>$imdi_session_ID</span>";
+
+	    	$a['project'] = get_project($imdi_session_url);
+	    	$a['country'] = get_country($imdi_session_url);
+	    	$a['languages'] = get_languages($imdi_session_url);
+
+	    	$a['resources'] = array();
+
+	    	foreach ($one_match->resources as $res)
+            {
+                switch($type)
+                {
+                    case (strpos($type,"audio")):
+                        $a['resources'][] = imdi_handle_audio($res->name,$res->url,$res->access_level,$imdi_session_title,$imdi_session_name,$imdi_session_url);
+                        break;
+                    case (strpos($type,"video")):
+                        $a['resources'][] = imdi_handle_video($res->name,$res->url,$res->access_level,$imdi_session_title,$imdi_session_name,$imdi_session_url);
+                        break;
+                    case (strpos($type,"eaf")>0):
+                        $a['resources'][] = imdi_handle_annotation($res->name,$res->url,$res->access_level,$imdi_session_title,$imdi_session_name,$imdi_session_url);
+                    	break;
+		    		case (strpos($type,"text")):
+                        $a['resources'][] = imdi_handle_text($res->name,$res->url,$res->access_level,$imdi_session_title,$imdi_session_name,$imdi_session_url);
+                        break;
+                    case (strpos($type,"image")):
+                        $a['resources'][] = imdi_handle_image($res->name,$res->url,$res->access_level,$imdi_session_title,$imdi_session_name,$imdi_session_url);
+                        break;
+                    case (strpos($type,"pdf")>0):
+                        echo imdi_handle_pdf($res->name,$res->url,$res->access_level,$imdi_session_title,$imdi_session_name,$imdi_session_url);
+                        break;
+	           }
+
+	        }
+	    	$results[] = $a;
+		}
+
+            echo $m->render('results', array('results' => $results));
+
+
+}
+
+# test accessibility for current user using ArchiveNodeInfo
+function is_accessible($url) {
+   	global $_opt_imdi_archive_url;
+	$archive_url = get_option($_opt_imdi_archive_url);
+	$request = xmlrpc_encode_request("LamusAPI.getNodeInfo", array((string)$url));
+   	$auth = base64_encode($_POST['user'].":".$_POST['token']);
+   	$context = stream_context_create(array('http' => array(
+      	'method' => "POST",
+      	'header' => "Content-Type: text/xml",
+      	'content' => $request
+)));
+
+   	$webservice = $archive_url . "/jkc/lamus/XmlRpcArchiveInfo";
+	$file = file_get_contents($webservice, false, $context);
+	$response = xmlrpc_decode($file);
+	if (xmlrpc_is_fault($response)) 
+	{
+      		echo "xmlrpc: $response[faultString] ($response[faultCode])";
+   	} 
+	else 
+	{
+      		$access =  $response["access.rights.read"];
+      		if (($access === 'anyAuthenticatedUser') || ($access === 'everybody'))
+      		{ return true; }
+		else
+      		{
+      			global $current_user;
+			get_currentuserinfo();
+      			$user = $current_user->user_login;
+			#$user = 'seba@mpi.nl';
+      			$pos = strpos($access,$user);
+			if($pos === false) 
+			{ return false; }
+			else
+			{ 					
+				return true; 
+			}
+   		}
+	}
+}
+
+# get NodeID from URL
+function get_nodeID($url) {
+   $request = xmlrpc_encode_request("LamusAPI.getNodeInfo", array((string)$url));
+   $auth = base64_encode($_POST['user'].":".$_POST['token']);
+   $context = stream_context_create(array('http' => array(
+      'method' => "POST",
+      'header' => "Content-Type: text/xml",
+      'content' => $request
+)));
+
+   	$webservice="http://corpus1.mpi.nl/jkc/lamus/XmlRpcArchiveInfo";
+	$file = file_get_contents($webservice, false, $context);
+	$response = xmlrpc_decode($file);
+	if (xmlrpc_is_fault($response)) 
+	{
+      		echo "xmlrpc: $response[faultString] ($response[faultCode])";
+   	} 
+	else 
+	{
+      		$nodeID =  $response["query.internalid"];
+      		return $nodeID;
+	}
+}
+
+class Match {
+	public $name = '';
+	public $title = '';
+	public $url = '';
+	public $access_level = '';
+	public $resources = array();
+
+
+	function __construct($a_name,$a_title,$an_url,$an_access_level) 
+	{
+		$this->name = $a_name;
+		$this->title = $a_title;
+		$this->url = $an_url;
+		$this->access_level = $an_access_level;
+		$this->resources = array();
+	}
+	function add_resource($a_resource)
+	{
+		$this->resources[] = $a_resource;
+	}
+}
+
+class Resource {
+	public $name = '';
+	public $format = '';
+	public $url = '';
+	public $access_level = '';
+
+	function __construct($a_name,$a_format,$an_url,$an_access_level) 
+	{
+		$this->name = $a_name;
+		$this->format = $a_format;
+		$this->url = $an_url;
+		$this->access_level = $an_access_level;
+	}
+}
+
+function imdi_handle_video($imdi_resource_name,$imdi_resource_url,$imdi_resource_access_level,$imdi_session_title,$imdi_session_name,$imdi_session_url) {
+    $themeurl = get_template_directory_uri();
+    $video_page = get_page_by_path("video-page");
+    $blog_root = get_bloginfo('url');
+    $list_item = "<li style=\"list-style-image:url(";    
+    $list_item .= plugins_url() . "/IMDI-search-plugin/images/video.png)\">";
+    $list_item .= get_access_image($imdi_resource_access_level);	
+    $list_item .= "<a style=\"vertical-align:super; \"href=\"$blog_root/?page_id=";
+    $list_item .= $video_page->ID;
+    $list_item .= "&imdi_url=$imdi_resource_url&imdi_name=$imdi_resource_name&imdi_access_level=$imdi_resource_access_level&imdi_session_name=$imdi_session_name&imdi_session_title=$imdi_session_title";
+    $list_item .= "&imdi_session_url=$imdi_session_url\">$imdi_resource_name</a>";
+    $list_item .= "</li>";
+    return $list_item;
+}
+
+function imdi_handle_audio($imdi_resource_name,$imdi_resource_url,$imdi_resource_access_level,$imdi_session_title,$imdi_session_name,$imdi_session_url) {
+    $themeurl = get_template_directory_uri();
+    $video_page = get_page_by_path("video-page");
+    $blog_root = get_bloginfo('url');
+    $list_item = "<li style=\"list-style-image:url(";    
+    $list_item .= plugins_url() . "/IMDI-search-plugin/images/audio.png)\">";
+    $list_item .= get_access_image($imdi_resource_access_level);	
+    $list_item .= "<a style=\"vertical-align:super; \"href=\"$blog_root/?page_id=";
+    $list_item .= $video_page->ID;
+    $list_item .= "&imdi_url=$imdi_resource_url&imdi_name=$imdi_resource_name&imdi_access_level=$imdi_resource_access_level&imdi_session_name=$imdi_session_name&imdi_session_title=$imdi_session_title";
+    $list_item .= "&imdi_session_url=$imdi_session_url\">$imdi_resource_name</a>";
+    $list_item .= "</li>";
+    return $list_item;
+}
+
+function imdi_handle_image($imdi_resource_name,$imdi_resource_url,$imdi_resource_access_level,$imdi_session_title,$imdi_session_name,$imdi_session_url) {
+    $themeurl = get_template_directory_uri();
+    $image_page = get_page_by_path("image-page");
+    $blog_root = get_bloginfo('url');
+    $list_item = "<li style=\"list-style-image:url(";
+    $list_item .= plugins_url() . "/IMDI-search-plugin/images/image.png)\">";
+    $list_item .= get_access_image($imdi_resource_access_level);	
+    $list_item .= "<a style=\"vertical-align:super; \"href=\"$blog_root/?page_id=";
+    $list_item .= $image_page->ID;
+    $list_item .= "&imdi_url=$imdi_resource_url&imdi_name=$imdi_resource_name&imdi_access_level=$imdi_resource_access_level&imdi_session_name=$imdi_session_name&imdi_session_title=$imdi_session_title";
+    $list_item .= "&imdi_session_url=$imdi_session_url\">$imdi_resource_name</a>";
+    $list_item .= "</li>";
+    return $list_item;
+}
+
+function imdi_handle_text($imdi_resource_name,$imdi_resource_url,$imdi_resource_access_level,$imdi_session_title,$imdi_session_name,$imdi_session_url) {
+    $themeurl = get_template_directory_uri();
+    $blog_root = get_bloginfo('url');
+    $list_item = "<li style=\"list-style-image:url(";    
+    $list_item .= plugins_url() . "/IMDI-search-plugin/images/text.png)\">";
+    $list_item .= get_access_image($imdi_resource_access_level);
+    $list_item .= "<a style=\"vertical-align:super; \"href=\"$imdi_resource_url\">$imdi_resource_name</a>";
+    $list_item .= "</li>";
+    return $list_item;
+}
+
+function imdi_handle_pdf($imdi_resource_name,$imdi_resource_url,$imdi_resource_access_level,$imdi_session_title,$imdi_session_name,$imdi_session_url) {
+    $themeurl = get_template_directory_uri();
+    $blog_root = get_bloginfo('url');
+    $list_item = "<li style=\"list-style-image:url(";    
+    $list_item .= plugins_url() . "/IMDI-search-plugin/images/pdf.png)\">";
+    $list_item .= get_access_image($imdi_resource_access_level);
+    $list_item .= "<a style=\"vertical-align:super; \"href=\"$imdi_resource_url\">$imdi_resource_name</a>";
+    $list_item .= "</li>";
+    return $list_item;
+}
+
+function imdi_handle_annotation($imdi_resource_name,$imdi_resource_url,$imdi_resource_access_level,$imdi_session_title,$imdi_session_name,$imdi_session_url) {
+    $themeurl = get_template_directory_uri();
+    $image_page = get_page_by_path("annotation-page");
+    $blog_root = get_bloginfo('url');
+    $list_item = "<li style=\"list-style-image:url(";
+    $list_item .= plugins_url() . "/IMDI-search-plugin/images/text.png)\">";
+    $list_item .= get_access_image($imdi_resource_access_level);
+    $list_item .= "<a style=\"vertical-align:super; \"href=\"$blog_root/?page_id=";
+    $list_item .= $image_page->ID;
+    $list_item .= "&imdi_url=$imdi_resource_url&imdi_name=$imdi_resource_name&imdi_access_level=$imdi_resource_access_level&imdi_session_name=$imdi_session_name&imdi_session_title=$imdi_session_title";
+    $list_item .= "&imdi_session_url=$imdi_session_url\">$imdi_resource_name</a>";
+    $list_item .= "</li>";
+    return $list_item;
+}
+
+function get_access_image($imdi_resource_access_level) {
+                switch($imdi_resource_access_level)
+                {
+                    case ($imdi_resource_access_level == 1):
+                        return "<img src='" . plugins_url() . "/IMDI-search-plugin/images/access_level_1.png' title='" . __('Access level 1: openly accessible') . "' class='access_level_img'/>";
+                    break;
+                    case ($imdi_resource_access_level == 2):
+                        return "<img src='" . plugins_url() . "/IMDI-search-plugin/images/access_level_2.png' title='" . __('Access level 2: accessible to registered users') . "' class='access_level_img'/>";
+                    break;
+                    case ($imdi_resource_access_level == 3):
+                        return "<img src='" . plugins_url() . "/IMDI-search-plugin/images/access_level_3.png' title='" . __('Access level 3: access can be requested') . "' class='access_level_img'/>";
+                    break;
+                    case ($imdi_resource_access_level == 4):
+                        return "<img src='" . plugins_url() . "/IMDI-search-plugin/images/access_level_4.png' title='" . __('Access level 4: not accessible') . "' class='access_level_img'/>";
+                    break;
+		}
+}
+
+function get_project($url){
+    #dl('http.so');
+    $body = http_parse_message(http_get($url))->body;
+    $xml = simplexml_load_string($body);
+    $project = $xml->Session->MDGroup->Project->Name;
+    return $project;
+}
+
+function get_country($url){
+    $body = http_parse_message(http_get($url))->body;
+    $xml = simplexml_load_string($body);
+    $country = $xml->Session->MDGroup->Location->Country;
+    return $country;
+}
+
+function get_languages($url){
+    $body = http_parse_message(http_get($url))->body;
+    $xml = simplexml_load_string($body);
+    $language_list = "";
+    if ($xml->Session->MDGroup->Content->Languages) {
+    foreach ($xml->Session->MDGroup->Content->Languages->children() as $languages) {
+    $language_list .= ", ";
+    $language_list .= $languages->Name;
+    }	
+    $language_list = substr($language_list, 4);
+    }
+    return $language_list;
+}
+
+function get_session_description($url)
+{
+    $body = http_parse_message(http_get($url))->body;
+    $xml = simplexml_load_string($body);
+    $description = $xml->Session->Description;
+    return $description;
+}
+
+/** Instantiate the class */
+$imdi_search_plugin = new IMDI_Search_Plugin;

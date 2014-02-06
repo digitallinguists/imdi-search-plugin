@@ -1,0 +1,67 @@
+/* Plugin Query Area
+------------------------------------------------------------ */
+
+.wpcf7-form-control {
+	width: auto !important;
+	display: block;
+}
+
+.infoblock {
+	float: right;
+}
+
+.session {
+	padding: 1em;
+}
+
+#categories ul {
+	list-style: none;
+	padding-left: 0;
+}
+
+#sample-plugin-query {
+	margin: 20px 0;
+}
+
+#sample-plugin-query .left {
+	width: 35%;
+}
+
+#sample-plugin-query .left input {
+	padding-left: 5px;
+	padding-right: 5px;
+}
+
+#sample-plugin-query .right {
+	/*width: 62%;*/
+}
+
+#query-api, #query-api-advanced {
+	cursor: pointer;
+	margin: 0 0 0 5px;
+	vertical-align: middle;
+}
+
+.waiting {
+	background: url(/images/waiting.gif) no-repeat scroll 0 0;
+	display: inline-block;
+	height: 16px;
+	margin-left: 5px;
+	text-indent: -9999px;
+	width: 16px;
+	vertical-align: middle;
+}
+
+.ui-autocomplete-loading {
+    background: white url('/images/waiting.gif') right center no-repeat;
+  }
+
+.plugin-info {
+	padding-bottom: 53px;
+}
+
+F
+/* Github Button Styling
+------------------------------------------------------------ */
+
+.button{position:relative;top:-1px;overflow:visible;display:inline-block;padding:1em 2em;border:1px solid #d4d4d4;margin:0;text-decoration:none;text-align:center;text-shadow:1px 1px 0 #fff;font:11px/normal sans-serif;color:#333 !important;white-space:nowrap;cursor:pointer;outline:0;background-color:#ececec;background-image:-webkit-gradient(linear,0 0,0 100%,from(#f4f4f4),to(#ececec));background-image:-moz-linear-gradient(#f4f4f4,#ececec);background-image:-ms-linear-gradient(#f4f4f4,#ececec);background-image:-o-linear-gradient(#f4f4f4,#ececec);background-image:linear-gradient(#f4f4f4,#ececec);-moz-background-clip:padding;background-clip:padding-box;border-radius:.2em;zoom:1;*display:inline}.button:hover,.button:focus,.button:active,.button.active{border-color:#3072b3;border-bottom-color:#2a65a0;text-decoration:none;text-shadow:-1px -1px 0 rgba(0,0,0,0.3);color:#fff !important;background-color:#3c8dde;background-image:-webkit-gradient(linear,0 0,0 100%,from(#599bdc),to(#3072b3));background-image:-moz-linear-gradient(#599bdc,#3072b3);background-image:-o-linear-gradient(#599bdc,#3072b3);background-image:linear-gradient(#599bdc,#3072b3)}.button:active,.button.active{border-color:#2a65a0;border-bottom-color:#3884cd;background-color:#3072b3;background-image:-webkit-gradient(linear,0 0,0 100%,from(#3072b3),to(#599bdc));background-image:-moz-linear-gradient(#3072b3,#599bdc);background-image:-ms-linear-gradient(#3072b3,#599bdc);background-image:-o-linear-gradient(#3072b3,#599bdc);background-image:linear-gradient(#3072b3,#599bdc)} .button::-moz-focus-inner{padding:0;border:0}

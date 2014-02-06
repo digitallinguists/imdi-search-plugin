@@ -1,0 +1,215 @@
+ /**
+ * jQuery and AJAX for the IMDI Archive Search Plugin.
+ *
+ * @since 1.0.0
+ *
+ * @package	IMDI Archive Search Plugin
+ * @author	Paul Trilsbeek
+ */
+
+
+
+jQuery(document).ready(function($){
+
+
+	$(window).bind('statechange',function(){ 
+		if (History.getState().data) {
+			if (History.getState().data.query) {
+				$('#imdi-query-value').val(decodeURIComponent(History.getState().data.query));
+			}
+		} 
+		
+		imdiRequest();
+	 });
+
+	function category_link_onclick(e) {
+		if (History.enabled) {
+			e.preventDefault();
+			console.log(e);
+			var query_string = getUrlVars(e.target.href)['query'];
+			console.log(query_string);
+			History.pushState({query: query_string}, null, '/browse?query=' + query_string);
+		}	}
+
+	$('#categories a').click(category_link_onclick);
+
+	/**
+	 * Perform the AJAX request when the user clicks the search button.
+	 */
+
+	 function imdiRequest() {
+
+		/** Output a message and loading icon */
+
+		var default_text = $('#query-api').val();
+		$('#query-api').val(imdi_archive_search_plugin_object.searching);
+		//$('#query-api').prop('disabled', true);
+		$('#results').after('<span class="waiting"></span>');
+
+
+		/** Setup our AJAX request */
+		var opts = {
+			url: imdi_archive_search_plugin_object.url,
+			type: 'GET',
+			async: true,
+			cache: false,
+			dataType: 'json',
+			data: {
+				action: 'search_IMDI_archive',
+				nonce: imdi_archive_search_plugin_object.nonce,
+				query: $('#imdi-query-value').val()
+			},
+			success: function(html){
+
+
+				/** Make sure to remove any previous error messages or data if we have any and append our data */
+				$('.search-results').empty().append(html);
+				
+				/** Remove the loading icon and replace the button with default text */
+				$('.waiting').remove();
+				$('#query-api').val(default_text);
+
+
+				/** Add the new query to the browser history so user can use the back button */
+			},
+			error: function(xhr, textStatus ,e) {
+				/** Make sure to remove any previous error messages or data if we have any */
+				$('.search-results').empty();
+				
+				/** If we have a response as to why our request didn't work, let's output it or give a default error message */
+				if ( xhr.responseText )
+					$('.search-results').append('<p class="plugin-error">' + xhr.responseText + '</p>');
+				else
+					$('.search-results').append('<p class="plugin-error">' + imdi_archive_search_plugin_object.error + '</p>');
+					
+				/** Remove the loading icon and replace the button with default text */
+				$('.waiting').remove();
+				$('#query-api').val(default_text);
+			}
+		}
+		
+		/** Process our actual AJAX request */
+		$.ajax(opts);;
+	 }
+
+	 function occurrencesRequest(path, name) {
+		
+		console.log("Send occurrencesRequest:" + path + " | " + name);
+
+		/** Setup our AJAX request */
+		var opts = {
+			url: imdi_archive_search_plugin_object.url,
+			type: 'GET',
+			async: true, 
+			cache: false,
+			dataType: 'json',
+			data: {
+				action: 'IMDI_get_occurrences',
+				nonce: imdi_archive_search_plugin_object.nonce,
+				path: path,
+				title: name
+			},
+			success: function(html){
+
+
+				/** Make sure to remove any previous error messages or data if we have any and append our data */
+				//$('#categories').empty().append(html);
+
+				$("#categories").append(html);
+				
+
+			},
+			error: function(xhr, textStatus ,e) {
+
+				console.log("error");
+				console.log(xhr);
+			}
+		}
+		
+		/** Process our actual AJAX request */
+		$.ajax(opts);
+	 }
+
+	 function outputPredefinedCategoryRequest(items, name) {
+
+	 			console.log("Send outputPredefinedCategoryRequest:" + items + " | " + name);
+
+	 		var opts = {
+			url: imdi_archive_search_plugin_object.url,
+			type: 'GET',
+			async: true, 
+			cache: false,
+			dataType: 'json',
+			data: {
+				action: 'IMDI_output_category',
+				nonce: imdi_archive_search_plugin_object.nonce,
+				items: items,
+				title: name
+			},
+			success: function(html){
+
+
+				/** Make sure to remove any previous error messages or data if we have any and append our data */
+				//$('#categories').empty().append(html);
+
+				$('#categories').append(html);
+
+			},
+			error: function(xhr, textStatus ,e) {
+
+				console.log("error");
+				console.log(xhr);
+			}
+
+	 	};
+
+	 	$.ajax(opts);
+
+	 }
+
+	$('body').on('click.searchIMDIarchive', '#query-api', function(e){
+	
+		/** Prevent the default action from occurring */
+		e.preventDefault();		
+
+		var History = window.History;
+
+		if (History.enabled) {
+			History.pushState({query: $('#imdi-query-value').val()}, null, '/browse?query=' + $('#imdi-query-value').val());
+		}
+		else imdiRequest();
+
+	});
+
+	if(_GET && _GET['query']) {
+		$('#imdi-query-value').val(_GET['query']);
+		imdiRequest();
+	}
+
+	for (var i in imdi_archive_search_plugin_object.categories) {
+		console.log(imdi_archive_search_plugin_object.categories[i]);
+		if (imdi_archive_search_plugin_object.categories[i]['type'] == "occurrences")
+			occurrencesRequest(imdi_archive_search_plugin_object.categories[i]['path'], imdi_archive_search_plugin_object.categories[i]['name']);
+		//else if (imdi_archive_search_plugin_object.categories[i]['type'] == "predefined")
+			//utputPredefinedCategoryRequest(imdi_archive_search_plugin_object.categories[i]['items'], imdi_archive_search_plugin_object.categories[i]['name']);
+
+	}
+
+	$('#categories a').click(category_link_onclick);
+
+});
+
+/** Helpers */
+
+function getUrlVars(url)
+{
+    var vars = [], hash;
+    var hashes = url.slice(url.indexOf('?') + 1).split('&');
+    for(var i = 0; i < hashes.length; i++)
+    {
+        hash = hashes[i].split('=');
+        vars.push(hash[0]);
+        vars[hash[0]] = hash[1];
+    }
+    return vars;
+}
