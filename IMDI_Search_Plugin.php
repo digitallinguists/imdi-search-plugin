@@ -638,7 +638,6 @@ function ajax_toggle_save_session() {
 	 	global $_opt_imdi_user_saved_session;
 
 		$user_saved_sessions = get_user_meta(get_current_user_id(), $_opt_imdi_user_saved_session);
-		//TODO gucken was hier im firefox schief geht
 		if (@in_array($session_url, $user_saved_sessions)) return true;
 			else return false;
 	}	
@@ -661,56 +660,7 @@ function parse_occurrences($xml)
 
 }
 
-function generate_response_output ($xml) {
-	global $_opt_imdi_max_results;
 
-	$no_of_results = $xml->Result->MatchCount;
-    if ($no_of_results > 0)
-    {
-	$match_list = array();
-        foreach ($xml->Result->Match as $match)
-        {
-	    $a_match = new Match((string)$match->Name,(string)$match->Title,(string)$match->URL,(string)$match->AccessLevel);
-
-	    // !! TODO RESOURCES !!
-           
-          foreach ($match->Resource as $res) {
-          	$a_match->add_resource(new Resource($res, null));
-          }
-                    	
-	// 	{
- //            if ( $show_only_accessible == false )
- //            	 {	
- //            	 $a_res = new Resource((string) $res->Name,(string) $res->Format,(string) $res->URL,(string) $res->AccessLevel);
-	// 			 $a_match->add_resource($a_res);
-	// 			 echo $a_match->resouces->name;
-	// 			 }
- //            else 
-	// 			 {
-	// 				if (is_accessible($res->URL))
-	// 					{
-	// 					$a_res = new Resource((string) $res->Name,(string) $res->Format,(string) $res->URL,(string) $res->AccessLevel);
-	// 					$a_match->add_resource($a_res);
-	// 					echo $a_match->resouces->name;
- //                		}
- //            		}
-	// 			 }    
-	// if (!empty($a_match->resources))
-	//    {
-
-
-	 	  $match_list[] = $a_match;
-	//    }
-	// }
-	}
-    output_matches($match_list, $no_of_results);
-   
-    // else
-    // {
-    //     echo __('no results');
-    // }
-	}
-}
 	
 	function output_pagelist($no_of_results)
 	{
@@ -749,6 +699,30 @@ function generate_response_output ($xml) {
 
 		return $filter;
 	}
+
+	function generate_response_output ($xml) {
+	global $_opt_imdi_max_results;
+
+	$no_of_results = $xml->Result->MatchCount;
+    if ($no_of_results > 0)
+    {
+	$match_list = array();
+        foreach ($xml->Result->Match as $match)
+        {
+	    $a_match = new Match((string)$match->Name,(string)$match->Title,(string)$match->URL,(string)$match->AccessLevel);
+
+	    // !! TODO RESOURCES !!
+           
+          foreach ($match->Resource as $res) {
+          	$a_match->add_resource(new Resource($res, null));
+          }
+   
+	 	  $match_list[] = $a_match;
+	}
+    output_matches($match_list, $no_of_results);
+   
+	}
+}
 
 	function output_matches($matches, $no_of_results) {
 
