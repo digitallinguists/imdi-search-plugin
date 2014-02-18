@@ -7,13 +7,58 @@
  * @author	Paul Trilsbeek
  */
 
-	
+function advancedSearchMakeActorGroup(letter) {
+	return {name: "(" + letter + ")", value: "Session.MDGroup.Actors.Actor(" + letter + ")", group: [
+			{ name: "Name", value: "Session.MDGroup.Actors.Actor(" + letter + ").Name" },
+			{ name: "Full Name", value: "Session.MDGroup.Actors.Actor(" + letter + ").FullName"},
+			{ name: "Code", value: "Session.MDGroup.Actors.Actor(" + letter + ").Code"},
+			{ name: "Age", value: "Session.MDGroup.Actors.Actor(" + letter + ").Age", operators: ["=", "<", ">"] },
+			{ name: "Birth Date", value: "Session.MDGroup.Actors.Actor(" + letter + ").BirthDate", type: "date", operators: ["=", "<", ">"]},
+			{ name: "Sex", value: "Session.MDGroup.Actors.Actor(" + letter + ").Sex", autocomplete: {type: "occurrences"}},
+			{ name: "Education", value: "Session.MDGroup.Actors.Actor(" + letter + ").Education"},
+			{ name: "Role", value: "Session.MDGroup.Actors.Actor(" + letter + ").Role", autocomplete: {type: "occurrences"}},
+			{ name: "Ethnic Group", value: "Session.MDGroup.Actors.Actor(" + letter + ").EthnicGroup", autocomplete: {type: "occurrences"}},
+			{ name: "Family Social Role", value: "Session.MDGroup.Actors.Actor(" + letter + ").FamilySocialRole"},
+			{ name: "Description", value: "Session.MDGroup.Actors.Actor(" + letter + ").Description"},
+			{ name: "Anonymized", value: "Session.MDGroup.Actors.Actor(" + letter + ").Anonymized", autocomplete: {type: "predefined", items: ["yes", "no"]}},
+			{ name: "Contact", value: "Session.MDGroup.Actors.Actor(" + letter + ").Contact", group: [
+				{ name: "Name", value: "Session.MDGroup.Actors.Actor(" + letter + ").Contact.Name", autocomplete: {type: "occurrences"}},
+				{ name: "Address", value: "Session.MDGroup.Actors.Actor(" + letter + ").Contact.Address"},
+				{ name: "Email", value: "Session.MDGroup.Actors.Actor(" + letter + ").Project.Contact.Email"},
+				{ name: "Organisation", value: "Session.Actors.Actor(" + letter + ").Project.Contact.Organisation", autocomplete: {type: "occurrences"}}
+			]}
+		]};
+}
+
+function advancedSearchMakeLanguageGroup(letter) {
+	return  { name: "(" + letter + ")", value: "Session.MDGroup.Content.Languages.Language(" + letter + ")", group: [
+				{ name: "Name", value: "Session.MDGroup.Content.Languages.Language(" + letter + ").Name", autocomplete: {type: "occurrences"}},
+				{ name: "ID", value: "Session.MDGroup.Content.Languages.Language(" + letter + ").ID", autocomplete: {type: "occurrences"}}
+			]};
+}
+
+function advancedSearchMakeMediaFileGroup(letter) {
+	return  { name: "(" + letter + ")", value: "Session.Resources.MediaFile(" + letter + ")", group: [
+				{ name: "Type", value: "Session.Resources.MediaFile(" + letter + ").Type", autocomplete: {type: "occurrences"}},
+				{ name: "Format", value: "Session.Resources.MediaFile(" + letter + ").Format", autocomplete: {type: "occurrences"}}
+			]};
+}
+
+function advancedSearchMakeWrittenResourceGroup(letter) {
+	return  { name: "(" + letter + ")", value: "Session.Resources.WrittenResource(" + letter + ")", group: [
+				{ name: "Date", value: "Session.Resources.WrittenResource(" + letter + ").Date", type: "date"},
+				{ name: "Type", value: "Session.Resources.WrittenResource(" + letter + ").Type", autocomplete: {type: "occurrences"}},
+				{ name: "Subtype", value: "Session.Resources.WrittenResource(" + letter + ").Subtype", autocomplete: {type: "occurrences"}},
+				{ name: "Format", value: "Session.Resources.WrittenResource(" + letter + ").Format", autocomplete: {type: "occurrences"}},
+
+
+			]};
+}
 
 var advancedsearch =  {group : [
 	{ name: "Session Name", value: "Session.Name" },
 	{ name: "Session Title", value: "Session.Title" },
 	{ name: "Date", value: "Session.Date", type: "date", operators: ["=", "<", ">"] },
-	{ name: "Description", value: "Session.Description" },
 	{ name: "Location", value: "Session.MDGroup.Location", group: [
 		{ name: "Continent", value: "Session.MDGroup.Location.Continent", autocomplete: {type: "occurrences"}},
 		{ name: "Country", value: "Session.MDGroup.Location.Country", autocomplete: {type: "occurrences"}},
@@ -33,6 +78,14 @@ var advancedsearch =  {group : [
 		]}		
 	]},
 	{ name: "Content", value: "Session.MDGroup.Content", group: [
+		{ name: "Languages", value: "Session.MDGroup.Content.Languages", group: [
+			advancedSearchMakeLanguageGroup("X"),
+			advancedSearchMakeLanguageGroup("Y"),
+			advancedSearchMakeLanguageGroup("Z"),
+			advancedSearchMakeLanguageGroup("U"),
+			advancedSearchMakeLanguageGroup("V"),
+			advancedSearchMakeLanguageGroup("W")
+		]},
 		{ name: "Genre", value: "Session.MDGroup.Content.Genre", autocomplete: {type: "occurrences"}},
 		{ name: "Subgenre", value: "Session.MDGroup.Content.Subgenre", autocomplete: {type: "occurrences"}},
 		{ name: "Task", value: "Session.MDGroup.Content.Task", autocomplete: {type: "occurrences"}},
@@ -46,137 +99,36 @@ var advancedsearch =  {group : [
 		]}
 	]},
 	{ name: "Actors", value: "Session.MDGroup.Actors", group: [
-		{name: "(X)", value: "Session.MDGroup.Actors.Actor(X)", group: [
-			{ name: "Name", value: "Session.MDGroup.Actors.Actor(X).Name" },
-			{ name: "Full Name", value: "Session.MDGroup.Actors.Actor(X).FullName"},
-			{ name: "Code", value: "Session.MDGroup.Actors.Actor(X).Code"},
-			{ name: "Age", value: "Session.MDGroup.Actors.Actor(X).Age", operators: ["=", "<", ">"] },
-			{ name: "Birth Date", value: "Session.MDGroup.Actors.Actor(X).BirthDate", type: "date", operators: ["=", "<", ">"]},
-			{ name: "Sex", value: "Session.MDGroup.Actors.Actor(X).Sex", autocomplete: {type: "occurrences"}},
-			{ name: "Education", value: "Session.MDGroup.Actors.Actor(X).Education"},
-			{ name: "Role", value: "Session.MDGroup.Actors.Actor(X).Role", autocomplete: {type: "occurrences"}},
-			{ name: "Ethnic Group", value: "Session.MDGroup.Actors.Actor(X).EthnicGroup", autocomplete: {type: "occurrences"}},
-			{ name: "Family Social Role", value: "Session.MDGroup.Actors.Actor(X).FamilySocialRole"},
-			{ name: "Description", value: "Session.MDGroup.Actors.Actor(X).Description"},
-			{ name: "Anonymized", value: "Session.MDGroup.Actors.Actor(X).Anonymized", autocomplete: {type: "predefined", items: ["yes", "no"]}},
-			{ name: "Contact", value: "Session.MDGroup.Actors.Actor(X).Contact", group: [
-				{ name: "Name", value: "Session.MDGroup.Actors.Actor(X).Contact.Name", autocomplete: {type: "occurrences"}},
-				{ name: "Address", value: "Session.MDGroup.Actors.Actor(X).Contact.Address"},
-				{ name: "Email", value: "Session.MDGroup.Actors.Actor(X).Project.Contact.Email"},
-				{ name: "Organisation", value: "Session.Actors.Actor(X).Project.Contact.Organisation", autocomplete: {type: "occurrences"}}
-			]}
-		]},
-		{name: "(Y)", value: "Session.MDGroup.Actors.Actor(Y)", group: [
-			{ name: "Name", value: "Session.MDGroup.Actors.Actor(Y).Name" },
-			{ name: "Full Name", value: "Session.MDGroup.Actors.Actor(Y).FullName"},
-			{ name: "Code", value: "Session.MDGroup.Actors.Actor(Y).Code"},
-			{ name: "Age", value: "Session.MDGroup.Actors.Actor(Y).Age", operators: ["=", "<", ">"] },
-			{ name: "Birth Date", value: "Session.MDGroup.Actors.Actor(Y).BirthDate", type: "date", operators: ["=", "<", ">"]},
-			{ name: "Sex", value: "Session.MDGroup.Actors.Actor(Y).Sex", autocomplete: {type: "occurrences"}},
-			{ name: "Education", value: "Session.MDGroup.Actors.Actor(Y).Education"},
-			{ name: "Role", value: "Session.MDGroup.Actors.Actor(Y).Role", autocomplete: {type: "occurrences"}},
-			{ name: "Ethnic Group", value: "Session.MDGroup.Actors.Actor(Y).EthnicGroup", autocomplete: {type: "occurrences"}},
-			{ name: "Family Social Role", value: "Session.MDGroup.Actors.Actor(Y).FamilySocialRole"},
-			{ name: "Description", value: "Session.MDGroup.Actors.Actor(Y).Description"},
-			{ name: "Anonymized", value: "Session.MDGroup.Actors.Actor(Y).Anonymized", autocomplete: {type: "predefined", items: ["yes", "no"]}},
-			{ name: "Contact", value: "Session.MDGroup.Actors.Actor(Y).Contact", group: [
-				{ name: "Name", value: "Session.MDGroup.Actors.Actor(Y).Contact.Name", autocomplete: {type: "occurrences"}},
-				{ name: "Address", value: "Session.MDGroup.Actors.Actor(Y).Contact.Address"},
-				{ name: "Email", value: "Session.MDGroup.Actors.Actor(Y).Project.Contact.Email"},
-				{ name: "Organisation", value: "Session.Actors.Actor(Y).Project.Contact.Organisation", autocomplete: {type: "occurrences"}}
-			]}
-		]},		
-		{name: "(Z)", value: "Session.MDGroup.Actors.Actor(Z)", group: [
-			{ name: "Name", value: "Session.MDGroup.Actors.Actor(Z).Name" },
-			{ name: "Full Name", value: "Session.MDGroup.Actors.Actor(Z).FullName"},
-			{ name: "Code", value: "Session.MDGroup.Actors.Actor(Z).Code"},
-			{ name: "Age", value: "Session.MDGroup.Actors.Actor(Z).Age", operators: ["=", "<", ">"] },
-			{ name: "Birth Date", value: "Session.MDGroup.Actors.Actor(Z).BirthDate", type: "date", operators: ["=", "<", ">"]},
-			{ name: "Sex", value: "Session.MDGroup.Actors.Actor(Z).Sex", autocomplete: {type: "occurrences"}},
-			{ name: "Education", value: "Session.MDGroup.Actors.Actor(Z).Education"},
-			{ name: "Role", value: "Session.MDGroup.Actors.Actor(Z).Role", autocomplete: {type: "occurrences"}},
-			{ name: "Ethnic Group", value: "Session.MDGroup.Actors.Actor(Z).EthnicGroup", autocomplete: {type: "occurrences"}},
-			{ name: "Family Social Role", value: "Session.MDGroup.Actors.Actor(Z).FamilySocialRole"},
-			{ name: "Description", value: "Session.MDGroup.Actors.Actor(Z).Description"},
-			{ name: "Anonymized", value: "Session.MDGroup.Actors.Actor(Z).Anonymized", autocomplete: {type: "predefined", items: ["yes", "no"]}},
-			{ name: "Contact", value: "Session.MDGroup.Actors.Actor(Z).Contact", group: [
-				{ name: "Name", value: "Session.MDGroup.Actors.Actor(Z).Contact.Name", autocomplete: {type: "occurrences"}},
-				{ name: "Address", value: "Session.MDGroup.Actors.Actor(Z).Contact.Address"},
-				{ name: "Email", value: "Session.MDGroup.Actors.Actor(Z).Project.Contact.Email"},
-				{ name: "Organisation", value: "Session.Actors.Actor(Z).Project.Contact.Organisation", autocomplete: {type: "occurrences"}}
-			]}
-		]},	
-		{name: "(U)", value: "Session.MDGroup.Actors.Actor(U)", group: [
-			{ name: "Name", value: "Session.MDGroup.Actors.Actor(U).Name" },
-			{ name: "Full Name", value: "Session.MDGroup.Actors.Actor(U).FullName"},
-			{ name: "Code", value: "Session.MDGroup.Actors.Actor(U).Code"},
-			{ name: "Age", value: "Session.MDGroup.Actors.Actor(U).Age", operators: ["=", "<", ">"] },
-			{ name: "Birth Date", value: "Session.MDGroup.Actors.Actor(U).BirthDate", type: "date", operators: ["=", "<", ">"]},
-			{ name: "Sex", value: "Session.MDGroup.Actors.Actor(U).Sex", autocomplete: {type: "occurrences"}},
-			{ name: "Education", value: "Session.MDGroup.Actors.Actor(U).Education"},
-			{ name: "Role", value: "Session.MDGroup.Actors.Actor(U).Role", autocomplete: {type: "occurrences"}},
-			{ name: "Ethnic Group", value: "Session.MDGroup.Actors.Actor(U).EthnicGroup", autocomplete: {type: "occurrences"}},
-			{ name: "Family Social Role", value: "Session.MDGroup.Actors.Actor(U).FamilySocialRole"},
-			{ name: "Description", value: "Session.MDGroup.Actors.Actor(U).Description"},
-			{ name: "Anonymized", value: "Session.MDGroup.Actors.Actor(U).Anonymized", autocomplete: {type: "predefined", items: ["yes", "no"]}},
-			{ name: "Contact", value: "Session.MDGroup.Actors.Actor(U).Contact", group: [
-				{ name: "Name", value: "Session.MDGroup.Actors.Actor(U).Contact.Name", autocomplete: {type: "occurrences"}},
-				{ name: "Address", value: "Session.MDGroup.Actors.Actor(U).Contact.Address"},
-				{ name: "Email", value: "Session.MDGroup.Actors.Actor(U).Project.Contact.Email"},
-				{ name: "Organisation", value: "Session.Actors.Actor(U).Project.Contact.Organisation", autocomplete: {type: "occurrences"}}
-			]}
-		]},
-		{name: "(V)", value: "Session.MDGroup.Actors.Actor(V)", group: [
-			{ name: "Name", value: "Session.MDGroup.Actors.Actor(V).Name" },
-			{ name: "Full Name", value: "Session.MDGroup.Actors.Actor(V).FullName"},
-			{ name: "Code", value: "Session.MDGroup.Actors.Actor(V).Code"},
-			{ name: "Age", value: "Session.MDGroup.Actors.Actor(V).Age", operators: ["=", "<", ">"] },
-			{ name: "Birth Date", value: "Session.MDGroup.Actors.Actor(V).BirthDate", type: "date", operators: ["=", "<", ">"]},
-			{ name: "Sex", value: "Session.MDGroup.Actors.Actor(V).Sex", autocomplete: {type: "occurrences"}},
-			{ name: "Education", value: "Session.MDGroup.Actors.Actor(V).Education"},
-			{ name: "Role", value: "Session.MDGroup.Actors.Actor(V).Role", autocomplete: {type: "occurrences"}},
-			{ name: "Ethnic Group", value: "Session.MDGroup.Actors.Actor(V).EthnicGroup"},
-			{ name: "Family Social Role", value: "Session.MDGroup.Actors.Actor(V).FamilySocialRole"},
-			{ name: "Description", value: "Session.MDGroup.Actors.Actor(V).Description"},
-			{ name: "Anonymized", value: "Session.MDGroup.Actors.Actor(V).Anonymized", autocomplete: {type: "predefined", items: ["yes", "no"]}},
-			{ name: "Contact", value: "Session.MDGroup.Actors.Actor(V).Contact", group: [
-				{ name: "Name", value: "Session.MDGroup.Actors.Actor(V).Contact.Name", autocomplete: {type: "occurrences"}},
-				{ name: "Address", value: "Session.MDGroup.Actors.Actor(V).Contact.Address"},
-				{ name: "Email", value: "Session.MDGroup.Actors.Actor(V).Project.Contact.Email"},
-				{ name: "Organisation", value: "Session.Actors.Actor(V).Project.Contact.Organisation", autocomplete: {type: "occurrences"}}
-			]}
-		]},	
-		{name: "(W)", value: "Session.MDGroup.Actors.Actor(W)", group: [
-			{ name: "Name", value: "Session.MDGroup.Actors.Actor(W).Name" },
-			{ name: "Full Name", value: "Session.MDGroup.Actors.Actor(W).FullName"},
-			{ name: "Code", value: "Session.MDGroup.Actors.Actor(W).Code"},
-			{ name: "Age", value: "Session.MDGroup.Actors.Actor(W).Age", operators: ["=", "<", ">"] },
-			{ name: "Birth Date", value: "Session.MDGroup.Actors.Actor(W).BirthDate", type: "date", operators: ["=", "<", ">"]},
-			{ name: "Sex", value: "Session.MDGroup.Actors.Actor(W).Sex", autocomplete: {type: "occurrences"}},
-			{ name: "Education", value: "Session.MDGroup.Actors.Actor(W).Education"},
-			{ name: "Role", value: "Session.MDGroup.Actors.Actor(W).Role", autocomplete: {type: "occurrences"}},
-			{ name: "Ethnic Group", value: "Session.MDGroup.Actors.Actor(W).EthnicGroup", autocomplete: {type: "occurrences"}},
-			{ name: "Family Social Role", value: "Session.MDGroup.Actors.Actor(W).FamilySocialRole"},
-			{ name: "Description", value: "Session.MDGroup.Actors.Actor(W).Description"},
-			{ name: "Anonymized", value: "Session.MDGroup.Actors.Actor(W).Anonymized", autocomplete: {type: "predefined", items: ["yes", "no"]}},
-			{ name: "Contact", value: "Session.MDGroup.Actors.Actor(W).Contact", group: [
-				{ name: "Name", value: "Session.MDGroup.Actors.Actor(W).Contact.Name", autocomplete: {type: "occurrences"}},
-				{ name: "Address", value: "Session.MDGroup.Actors.Actor(W).Contact.Address"},
-				{ name: "Email", value: "Session.MDGroup.Actors.Actor(W).Project.Contact.Email"},
-				{ name: "Organisation", value: "Session.Actors.Actor(W).Project.Contact.Organisation", autocomplete: {type: "occurrences"}}
-			]}
-		]}
+		advancedSearchMakeActorGroup("X"),
+		advancedSearchMakeActorGroup("Y"),		
+		advancedSearchMakeActorGroup("Z"),	
+		advancedSearchMakeActorGroup("U"),
+		advancedSearchMakeActorGroup("V"),	
+		advancedSearchMakeActorGroup("W")
 	]},
 	{ name: "Resources", value: "Session.Resources", group: [
-			{ name: "Name", value: "???"},
-			{ name: "Format", value: "????", autocomplete: {type: "predefined", items: ["video", "audio", "pdf", "ELAN"]}},
-			{ name: "Access Level", value: "????"}
+			{ name: "MediaFile", group: [
+				advancedSearchMakeMediaFileGroup("X"),
+				advancedSearchMakeMediaFileGroup("Y"),		
+				advancedSearchMakeMediaFileGroup("Z"),	
+				advancedSearchMakeMediaFileGroup("U"),
+				advancedSearchMakeMediaFileGroup("V"),	
+				advancedSearchMakeMediaFileGroup("W")
+			]},
+			{ name: "WrittenResource", group: [
+				advancedSearchMakeWrittenResourceGroup("X"),
+				advancedSearchMakeWrittenResourceGroup("Y"),		
+				advancedSearchMakeWrittenResourceGroup("Z"),	
+				advancedSearchMakeWrittenResourceGroup("U"),
+				advancedSearchMakeWrittenResourceGroup("V"),	
+				advancedSearchMakeWrittenResourceGroup("W")
+			]}
 		]}	
 ]};
 
 jQuery(document).ready(function($){
 
-
+	$( ".imdi-category-tabs" ).tabs({ collapsible: true });
 
 	$(window).bind('statechange',function(){ 
 
@@ -186,7 +138,7 @@ jQuery(document).ready(function($){
 		console.log("popp");
 		if (History.getState().data) {
 
-			if (!(History.getState().data['new_request'] == true)) prefill_values(History.getState().data);
+			//if (!(History.getState().data['new_request'] == true)) prefill_values(History.getState().data);
 
 			if (History.getState().data.query) {
 				var query_value = decodeURIComponent(History.getState().data.query);
@@ -243,25 +195,26 @@ jQuery(document).ready(function($){
 			type: 'GET',
 			async: true,
 			cache: false,
-			dataType: 'html',
+			dataType: 'json',
 			data: {
 				action: 'search_IMDI_archive',
 				nonce: imdi_archive_search_plugin_object.nonce,
 				query: query_value,
 				beginningAt:  (_GET && _GET['beginningAt']) ? _GET['beginningAt'] : 0
 			},
-			success: function(html){
+			success: function(response){
 
 
 				/** Make sure to remove any previous error messages or data if we have any and append our data */
-				$('.search-results').empty().append(html);
 
-				jQuery(".detailtabs").each(function(){jQuery(this).tabs(
+				$('.search-results').empty().append(response.html);
+
+				jQuery(".imdi_detailtabs").each(function(){jQuery(this).tabs(
 					{
 						collapsible: true,
 						active: false,
 						activate: function(event, ui) {
-							if ($(ui.newTab[0]) && $(ui.newTab[0]).hasClass("infoCountry")) {
+							if ($(ui.newTab[0]) && $(ui.newTab[0]).hasClass("imdi_infoCountry")) {
 								if (L) {
 									var countryName = $(ui.newTab[0]).children('a').text();
 									// if we have leaflet.js (a map library), look up the country
@@ -529,6 +482,10 @@ jQuery(document).ready(function($){
 			inputField.before(operatorSelect);
 		}
 
+		if (item.type == 'date') {
+			inputField.attr("placeholder", "YYYY-MM-DD");
+		}
+
 		if (item.autocomplete) {
 			if (item.autocomplete.type == "predefined") {
 				jQuery(inputField).autocomplete({source: item.autocomplete.items});
@@ -638,7 +595,7 @@ jQuery(document).ready(function($){
 		jQuery("#imdi-advanced-search").empty();
 		console.log(data['constraints']);
 		if (data['constraints']) {
-				$( "#tabs" ).tabs( "option", "active", 2 ); 
+				$( ".imdi-category-tabs" ).tabs( "option", "active", 2 ); 
 				var constraints = data['constraints'];
 				if (typeof constraints == 'string' || constraints instanceof String)
 					constraints = JSON.parse(constraints);
@@ -667,10 +624,10 @@ jQuery(document).ready(function($){
 		// else a simple search
 		if (data['query']) {
 			if (data['query'].substr(0, 2) == "a:") {
-				$( "#tabs" ).tabs( "option", "active", 0);
+				$( ".imdi-category-tabs" ).tabs( "option", "active", 0);
 			}
 		else 
-			$( "#tabs" ).tabs( "option", "active", 1);
+			$( ".imdi-category-tabs" ).tabs( "option", "active", 1);
 		}
 	}
 	}

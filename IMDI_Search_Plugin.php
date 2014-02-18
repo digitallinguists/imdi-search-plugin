@@ -46,7 +46,22 @@ Mustache_Autoloader::register();
 
 $m = NULL;
  
+function imdi_the_title( $title, $id ) {
 
+		if ($id == get_page_by_path("resource-page")->ID)
+			return $_GET['title'];
+
+	return $title;
+}
+
+function imdi_wp_title( $title, $sep) {
+	if (is_page('resource-page'))
+		return $_GET['title'];
+}
+add_filter( 'wp_title', 'imdi_wp_title', 10, 2 );
+add_filter( 'the_title', 'imdi_the_title', 10, 2 );
+
+ 
  
 class IMDI_Search_Plugin {
 
@@ -81,6 +96,10 @@ class IMDI_Search_Plugin {
 
 		add_action( 'wp_ajax_IMDI_output_category', array( $this, 'ajax_output_category' ) );				
 		add_action( 'wp_ajax_nopriv_IMDI_output_category', array( $this, 'ajax_output_category' ) );		
+
+		//add_action( 'wp_ajax_IMDI_make_media_thumbnail, array( $this, 'ajax_make_media_thumbnail' ) );				
+		//add_action( 'wp_ajax_nopriv_IMDI_make_media_thumbnail', array( $this, 'ajax_make_media_thumbnailr_' ) );		
+
 
 		add_action( 'wp_ajax_IMDI_toggle_save_session', array( $this, 'ajax_toggle_save_session' ) );				
 
@@ -147,6 +166,10 @@ class IMDI_Search_Plugin {
 		
 		/** responsive table styles */
 		wp_register_style('responsive_tables', plugins_url( '/css/resultstable.css', __FILE__ ));
+
+		/** jQuery UI components */
+		wp_register_script( 'jquery-ui', plugins_url( '/vendor/js/jquery-ui-1.10.4.custom.min.js', __FILE__ ));
+		wp_register_style('jquery-ui', plugins_url( '/vendor/css/ui-lightness/jquery-ui-1.10.4.custom.css', __FILE__ ));
 	
 /** register maps plugin */
 		wp_register_script( 'leaflet_maps', 'http://cdn.leafletjs.com/leaflet-0.7.2/leaflet.js');
@@ -161,6 +184,9 @@ class IMDI_Search_Plugin {
 	 * @since 0.1.0
 	 */
 	public function shortcode() {
+
+		wp_enqueue_script('jquery-ui');
+		wp_enqueue_style('jquery-ui');
 	
 		/** Enqueue our scripts and styles */
 		wp_enqueue_script( 'imdi-archive-search-plugin' );
@@ -184,7 +210,8 @@ class IMDI_Search_Plugin {
 													'resultsTitle' => __("Results", "imdi"),
 													'categoriesTabTitle' => __("Categories", "imdi"),
 													'fulltextSearchTabTitle' => __("Fulltext search", "imdi"),
-													'advancedSearchTabTitle' => __("Advanced search", "imdi")
+													'advancedSearchTabTitle' => __("Advanced search", "imdi"),
+													'onlyWithRessourcesText' => __("Only show results with freely accessible resources")
 													));
 
 		$_GET = stripslashes_deep($_GET);
@@ -212,100 +239,80 @@ class IMDI_Search_Plugin {
 	public function shortcode_resourcepage($atts) {
 
 		$session_details = get_session_details($_GET["imdi_url"]);
-		$resource_elem = $session_details->xpath('//Resources/*/ResourceLink[text()="' . $_GET['url'] . '"]');
+		$xpath = '/a:METATRANSCRIPT/a:Session/a:Resources/*/a:ResourceLink[contains(., "' . $_GET['filename'] . '")]/..';
+		$resource_elem = $session_details->xpath($xpath)[0];
 
 		$m = new Mustache_Engine(array(
     		'loader' => new Mustache_Loader_FilesystemLoader(dirname(__FILE__) . '/templates', array('extension' => '.html')),
 		));
 
-		$trans = array(
+		$translated_text = array(
 			'project' => __('Project', 'imdi'),
 			'country' => __('Country', 'imdi'),
 			'languages' => __('Languages', 'imdi'),
 			'file' => __('File', 'imdi'),
 			'goBackText' => __('Go back to search results', 'imdi'),
+			'downloadInstructions' => __('To download, right click on link and select \'Save as...\'')
 			);
-
-		$output = '';
 	
-		switch ($atts['type']) {
-			case 'video':
-				return $m->render('video-page', array(
+	
+		    foreach ($session_details->Session->MDGroup->Content->Languages->children() as $language) {
+	    		if ($languages) $languages .= ", "; 
+	    		$languages .= $language->Name;
+	    	}
+	    	if ($languages == ' ') $languages = null;
+
+
+		$standard_params = array(
 					'project' =>  $session_details->Session->MDGroup->Project->Title,
 					'country' => $session_details->Session->MDGroup->Location->Country,
-					//'languages' => get_languages($_GET["imdi_session_url"]),
+					'languages' => $languages.(string)$resource_elem->Format,
 					'session_desc' => $session_details->Session->Description,
-					'filename' => $_GET['url'],
+					'filename' => http_build_url($_GET['imdi_url'], array("path"=>(string)$resource_elem->ResourceLink), HTTP_URL_JOIN_PATH),
 					'session_name' => $session_details->Session->Name,
 					'session_title' => $session_details->Session->Title,
-					'trans' => $trans
-				));
+					'size'
+					'trans' => $translated_text
+				);
+
+		switch ((string)$resource_elem->Format) {
+			case (strpos((string)$resource_elem->Format, "video")):
+				if ($resource_elem->Format == "video/x-mpeg1")
+					return $m->render('resource_view_default', $standard_params);
+				return $m->render('resource_view_video', $standard_params);
 			break;
-			case 'audio':
-				return $m->render('audio-page', array(
-					'project' =>  $session_details->Session->MDGroup->Project->Title,
-					'country' => $session_details->Session->MDGroup->Location->Country,
-					//'languages' => get_languages($_GET["imdi_session_url"]),
-					'session_desc' => $session_details->Session->Description,
-					'filename' => $_GET['url'],
-					'session_name' => $session_details->Session->Name,
-					'session_title' => $session_details->Session->Title,
-					'trans' => $trans
-				));
+			case strpos((string)$resource_elem->Format, "audio"):
+				if ($resource_elem->Format == "audio/x-wav")
+					return $m->render('resource_view_wav', $standard_params);
+				return $m->render('resource_view_audio', $standard_params);
+
 			break;
-			case 'image':
-				return $m->render('image-page', array(
-					'project' =>  $session_details->Session->MDGroup->Project->Title,
-					'country' => $session_details->Session->MDGroup->Location->Country,
-					//'languages' => get_languages($_GET["imdi_session_url"]),
-					'session_desc' => $session_details->Session->Description,
-					'filename' => $_GET['url'],
-					'session_name' => $session_details->Session->Name,
-					'session_title' => $session_details->Session->Title,
-					'trans' => $trans
-				));
+			case strpos((string)$resource_elem->Format, "image"):
+				return $m->render('resource_view_image', $standard_params);
 			break;	
-			case 'text':
-				return $m->render('text-page', array(
-					'project' =>  $session_details->Session->MDGroup->Project->Title,
-					'country' => $session_details->Session->MDGroup->Location->Country,
-					//'languages' => get_languages($_GET["imdi_session_url"]),
-					'session_desc' => $session_details->Session->Description,
-					'filename' => $_GET['url'],
-					'session_name' => $session_details->Session->Name,
-					'session_title' => $session_details->Session->Title,
-					'trans' => $trans
-				));
-			break;
-			case 'eaf':
+			case strpos((string)$resource_elem->Format, "eaf")>0: {
 				wp_enqueue_script('wavesurfer');
 				wp_enqueue_script('wavesurfer-elan');
 				wp_enqueue_script('elan-player');
-				return $m->render('eaf-page', array(
-					'project' =>  $session_details->Session->MDGroup->Project->Title,
-					'country' => $session_details->Session->MDGroup->Location->Country,
-					//'languages' => get_languages($_GET["imdi_session_url"]),
-					'session_desc' => $session_details->Session->Description,
-					'filename' => $_GET['url'],
-					'session_name' => $session_details->Session->Name,
-					'session_title' => $session_details->Session->Title,
-					'trans' => $trans
-				));
+
+				$standard_params['trans'] = array_merge($standard_params['trans'], array(
+						"play" => __("Play", "imdi")
+					));
+
+				return $m->render('resource_view_eaf', $standard_params);
+			}
 			break;
-			case 'pdf':
-				return $m->render('pdf-page', array(
-					'project' =>  $session_details->Session->MDGroup->Project->Title,
-					'country' => $session_details->Session->MDGroup->Location->Country,
-					//'languages' => get_languages($_GET["imdi_session_url"]),
-					'session_desc' => $session_details->Session->Description,
-					'filename' => $_GET['url'],
-					'session_name' => $session_details->Session->Name,
-					'session_title' => $session_details->Session->Title,
-					'trans' => $trans
-				));
+			case strpos((string)$resource_elem->Format, "text"):
+				return $m->render('resource_view_text', $standard_params);
+
+			break;
+			
+			case strpos((string)$resource_elem->Format, "pdf")>0:
+				return $m->render('resource_view_pdf', $standard_params);
+
 			break;
 			default:
-				return __("No media type specified in shortcode", "imdi");
+				return __("Unknown media type", "imdi").": ".(string)$resource_elem->Format . "(".strpos((string)$resource_elem->Format, "video") .")";
 		}
 
 	}
@@ -372,12 +379,12 @@ class IMDI_Search_Plugin {
 		if (substr($query_term, 0, 2) == "a:") {
 		   $query_type = "advanced";
 		   $query_term = str_replace("\\\\n", "\n", substr($query_term, 2));
-		   echo $query_term;
+		   //echo $query_term;
 		}
 			
 		$query_string = $servlet_url . 
 			'?action=getMatches&first=' . $beginningAt . '&last='
-			. strval(intval($beginningAt) + intval($max_results) -1) .  
+			. strval(intval($beginningAt) + ($max_results - 1)) . 
 			'&query=' 
 			. rawurlencode($query_term) . 
 			'&type='.$query_type.'&nodeid=MPI'
@@ -406,7 +413,10 @@ class IMDI_Search_Plugin {
 		$response = generate_response_output( $response_xml );
 		
 		/** Send the response back to our script and die */
-		echo json_encode( $response );
+		echo json_encode( array(
+			'html' => $response,
+			'query_url' => $query_string,
+			));
 		die;
 	
 	}
@@ -417,7 +427,7 @@ class IMDI_Search_Plugin {
 	public function ajax_occurrences() {
 
 		/** Do a security check first */
-		//check_ajax_referer( 'imdi-archive-search-plugin-nonce', 'nonce' );
+		check_ajax_referer( 'imdi-archive-search-plugin-nonce', 'nonce' );
 
 		global $_opt_imdi_servlet_url;
 		global $_opt_imdi_topnode;
@@ -495,6 +505,24 @@ class IMDI_Search_Plugin {
 		die();
 	}
 
+	public function ajax_make_media_thumbnail() {
+		//check_ajax_referer( 'imdi-archive-search-plugin-nonce', 'nonce' );
+
+		// only honour request for media on IMDI server 
+		$servlet_url = get_option($_opt_imdi_servlet_url);
+		$media_url = $_GET['src'];
+
+		if (!parse_url($servlet_url)['host'] == parse_url($media_url)['host'])
+			die("Forbidden source host");
+
+		switch ($_GET["format"]) {
+			case "image/jpeg":
+
+			break;
+			default:
+				die ("Unknown format");
+		}
+	}
 
 function ajax_toggle_save_session() {
 	global $_opt_imdi_user_saved_session;
@@ -575,11 +603,10 @@ function ajax_toggle_save_session() {
 	    		$a['address'] = $session_details->Session->MDGroup->Location->Address;
 	    	}
 
-
 	    	foreach ($session_details->Session->MDGroup->Content->Languages->children() as $language) {
-	    		$a['languages'] .= $language->Name . " ";
+	    		if ($a['languages']) $a['languages'] .= ", "; 
+	    		$a['languages'] .= $language->Name;
 	    	}
-
 	    	if ($a['languages'] == ' ') $a['languages'] = null;
 
 
@@ -600,30 +627,10 @@ function ajax_toggle_save_session() {
 
 	    	foreach ($resources as $res)
             {	
-            	//echo "addres: " . $var_dump($res);
-                switch($res->format)
-                {
-                    case (strpos($res->format,"audio")):
-                        $a['resources'][] = imdi_handle_audio($res, $session_url);
-                        break;
-                    case (strpos($res->format,"video")):
-                        $a['resources'][] = imdi_handle_video($res,$session_url);
-                        break;
-                    case (strpos($res->format,"eaf")>0):
-                        $a['resources'][] = imdi_handle_annotation($res,$session_url);
-                    	break;
-		    		case (strpos($res->format,"text")):
-                        $a['resources'][] = imdi_handle_text($res,$session_url);
-                        break;
-                    case (strpos($res->format,"image")):
-                        $a['resources'][] = imdi_handle_image($res,$session_url);
-                        break;
-                    case (strpos($res->format,"pdf")>0):
-                        $a['resources'][] = imdi_handle_pdf($res,$session_url);
-                        break;
-                        default:
-	           }
 
+            	$res_page_title = $session_details->Session->Title;
+            	if (empty($res_page_title)) $res_page_title = $session_details->Session->Name;
+            	 $a['resources'][] = imdi_handle_resource($res,$session_url, $res_page_title);
 	        }
 
 	       
@@ -662,13 +669,19 @@ function parse_occurrences($xml)
 
 function generate_response_output ($xml) {
 	global $_opt_imdi_max_results;
+	$max_results = get_option($_opt_imdi_max_results);
 
 	$no_of_results = $xml->Result->MatchCount;
     if ($no_of_results > 0)
     {
 	$match_list = array();
+
+		$counter = 0;
+
         foreach ($xml->Result->Match as $match)
         {
+
+        	$counter++;
 	    $a_match = new Match((string)$match->Name,(string)$match->Title,(string)$match->URL,(string)$match->AccessLevel);
 
 	    // !! TODO RESOURCES !!
@@ -676,6 +689,11 @@ function generate_response_output ($xml) {
           foreach ($match->Resource as $res) {
           	$a_match->add_resource(new Resource($res, null));
           }
+
+
+          // if ($_GET['onlyRes'] == 'checked') {
+          // 	if (empty($a_match->resources)) continue;
+          // }
                     	
 	// 	{
  //            if ( $show_only_accessible == false )
@@ -702,7 +720,8 @@ function generate_response_output ($xml) {
 	//    }
 	// }
 	}
-    output_matches($match_list, $no_of_results);
+
+    return output_matches($match_list, $no_of_results);
    
     // else
     // {
@@ -711,7 +730,7 @@ function generate_response_output ($xml) {
 	}
 }
 	
-	function output_pagelist($no_of_results)
+	function generate_pagelist($no_of_results)
 	{
 		global $_opt_imdi_max_results;
 
@@ -723,38 +742,40 @@ function generate_response_output ($xml) {
 		$number_of_pages = floor($no_of_results /  $max_results);
 		for ($i = 0; $i <= $number_of_pages; $i++) {
 			$pages[] = array(
-				"page_number" => $i+1,
-				"page_link" => "?query=" . stripslashes($_GET['query']) . "&beginningAt=" . $i *  $max_results 
+				"page_number" => $i + 1,
+				"page_link" => "?query=" . stripslashes($_GET['query']) . "&beginningAt=" . $i  * $max_results
 			);
 		}
 
-		echo $m->render('pageindex_snippet', array("pages" => $pages));
+		return $m->render('pageindex_snippet', array("pages" => $pages));
 
 	}	
 
-	function filter_parse($filter, $session_details) 
-	{
-		$country = (string)$session_details->Session->MDGroup->Location->Country;
+	// function filter_parse($filter, $session_details) 
+	// {
+	// 	$country = (string)$session_details->Session->MDGroup->Location->Country;
 
-		if (!$filter['country']) $filter['country'] = array();
+	// 	if (!$filter['country']) $filter['country'] = array();
 
 		
-		//echo "FILTER (" . var_dump($country_key) .", " .var_dump($filter) . ")";
-		if (array_key_exists($country, $filter['country'])) {
-			$filter['country'][$country]++;
-		} else {
-			$filter['country'][$country] = 1;
-		}
+	// 	//echo "FILTER (" . var_dump($country_key) .", " .var_dump($filter) . ")";
+	// 	if (array_key_exists($country, $filter['country'])) {
+	// 		$filter['country'][$country]++;
+	// 	} else {
+	// 		$filter['country'][$country] = 1;
+	// 	}
 
-		return $filter;
-	}
+	// 	return $filter;
+	// }
 
 	function output_matches($matches, $no_of_results) {
 
-		output_pagelist($no_of_results);
+		$output = '';
+
+		$output .= generate_pagelist($no_of_results);
 
 		$results = array();
-		$filter = array();
+		//$filter = array();
 
 		global $m;
 	 	foreach ($matches as $one_match)
@@ -765,16 +786,16 @@ function generate_response_output ($xml) {
  			$session_details = get_session_details($imdi_session_url);
 
  			$results[] = output_session($imdi_session_url, $one_match, $session_details);
- 			$filter = filter_parse($filter, $session_details);     	
+ 			//$filter = filter_parse($filter, $session_details);     	
   		}
 
-  		echo var_dump($filter);
-  		echo $m->render('results', array(
-  			"results" => $results,
-  			"filter" => $filter));
+  		$output .= $m->render('results', array(
+  			"results" => $results/*,
+  			"filter" => $filter*/));
 
-  		output_pagelist($no_of_results);
+  		$output .= generate_pagelist($no_of_results);
 
+  		return $output;
 }
 
 # test accessibility for current user using ArchiveNodeInfo
@@ -882,7 +903,7 @@ class Resource {
 			$this->access_level = 1;//$an_access_level;
 			// foreach ($xml->ResourceLink->attributes() as $attr => $val) {
 			// 	if ($attr == "ArchiveHandle") $this->handle = $val; 
-			// }
+			// } 
 		} else if ($xml->getName() == "Resource") {
 			$this->name = $xml->Name;
 			$this->format = $xml->Format;
@@ -894,117 +915,104 @@ class Resource {
 	}
 }
 
-function imdi_handle_video($res, $imdi_session_url) {
+function imdi_handle_resource($res, $imdi_session_url, $title) {
 	global $m;
 
-	return $m->render('ressource_snippet', array(	'listimageURL' => plugins_url() . '/IMDI-search-plugin/images/video.png',
+
+	return $m->render('ressource_snippet', array(	'listimageURL' => get_resource_icon($res->format),
 													'accessImage' => get_access_image($res->access_level),
 													'blogRoot' => get_bloginfo('url'),
-													'videoPageID' => get_page_by_path("video-page")->ID,
+													'videoPageID' => get_page_by_path("resource-page")->ID,
 													'imdiURL' => $imdi_session_url,
-													'imdiName' => $res->name,
-													'imdiAccessLevel' => $res->access_level,
 													'fileName' => $res->name,
-													'url' => $res->url
-													));
-}
-
-function imdi_handle_audio($res, $imdi_session_url) {
-	global $m;
-
-	return $m->render('ressource_snippet', array(	'listimageURL' => plugins_url() . '/IMDI-search-plugin/images/audio.png',
-													'accessImage' => get_access_image($res->access_level),
-													'blogRoot' => get_bloginfo('url'),
-													'videoPageID' => get_page_by_path("audio-page")->ID,
-													'imdiURL' => $imdi_session_url,
-													'imdiAccessLevel' => $res->access_level,
-													'url' => $res->url,
-													'fileName' => $res->name
-													));
-}
-
-function imdi_handle_image($res, $imdi_session_url) {
- 	global $m;
-
-	return $m->render('ressource_snippet', array(	'listimageURL' => plugins_url() . '/IMDI-search-plugin/images/image.png',
-													'accessImage' => get_access_image($res->access_level),
-													'blogRoot' => get_bloginfo('url'),
-													'videoPageID' => get_page_by_path("image-page")->ID,
-													'imdiURL' => $imdi_session_url,
-													'imdiAccessLevel' => $res->access_level,
-													'url' => $res->url,
-													'fileName' => $res->name
-													));
-}
-
-function imdi_handle_text($res, $imdi_session_url) {
-	global $m;
-
-	return $m->render('ressource_snippet', array(	'listimageURL' => plugins_url() . '/IMDI-search-plugin/images/text.png',
-													'accessImage' => get_access_image($res->access_level),
-													'blogRoot' => get_bloginfo('url'),
-													'videoPageID' => get_page_by_path("text-page")->ID,
-													'imdiURL' => $imdi_session_url,
-													'imdiAccessLevel' => $res->access_level,
-													'url' => $res->url,
-													'fileName' => $res->name
-													));
-}
-
-function imdi_handle_pdf($res, $imdi_session_url) {
-	global $m;
-
-	return $m->render('ressource_snippet', array(	'listimageURL' => plugins_url() . '/IMDI-search-plugin/images/pdf.png',
-													'accessImage' => get_access_image($res->access_level),
-													'blogRoot' => get_bloginfo('url'),
-													'videoPageID' => get_page_by_path("pdf-page")->ID,
-													'imdiURL' => $imdi_session_url,
-													'imdiAccessLevel' => $res->access_level,
-													'url' => $res->url,
-													'fileName' => $res->name
-													));
-}
-
-function imdi_handle_annotation($res, $imdi_session_url) {
-	global $m;
-
-	return $m->render('ressource_snippet', array(	'listimageURL' => plugins_url() . '/IMDI-search-plugin/images/text.png',
-													'accessImage' => get_access_image($res->access_level),
-													'blogRoot' => get_bloginfo('url'),
-													'videoPageID' => get_page_by_path("eaf-page")->ID,
-													'imdiURL' => $imdi_session_url,
-													'imdiAccessLevel' => $res->access_level,
-													'url' => $res->url,
-													'fileName' => $res->name
+													'title' => $title
 													));
 }
 
 function get_access_image($imdi_resource_access_level) {
                 switch($imdi_resource_access_level)
                 {
-                    case ($imdi_resource_access_level == 1):
-                        return "<img src='" . plugins_url() . "/IMDI-search-plugin/images/access_level_1.png' title='" . __('Access level 1: openly accessible', 'imdi') . "' class='access_level_img'/>";
+                    case 1:
+                    	$image = "access_level_1.png";
+                    	$text = __('Access level 1: openly accessible', 'imdi');
                     break;
-                    case ($imdi_resource_access_level == 2):
-                        return "<img src='" . plugins_url() . "/IMDI-search-plugin/images/access_level_2.png' title='" . __('Access level 2: accessible to registered users', 'imdi') . "' class='access_level_img'/>";
+                    case 2:
+                    	$image = "access_level_2.png";
+                        $text = __('Access level 2: accessible to registered users', 'imdi');
                     break;
-                    case ($imdi_resource_access_level == 3):
-                        return "<img src='" . plugins_url() . "/IMDI-search-plugin/images/access_level_3.png' title='" . __('Access level 3: access can be requested', 'imdi') . "' class='access_level_img'/>";
+                    case 3:
+                    	$image = "access_level_3.png";
+                        $text = __('Access level 3: access can be requested', 'imdi');
                     break;
-                    case ($imdi_resource_access_level == 4):
-                        return "<img src='" . plugins_url() . "/IMDI-search-plugin/images/access_level_4.png' title='" . __('Access level 4: not accessible', 'imdi') . "' class='access_level_img'/>";
+                    case 4:
+                    	$image = "access_level_4.png";
+                        $text = __('Access level 4: not accessible', 'imdi');
                     break;
 		}
+
+	return array(
+		"src" => plugins_url() . "/IMDI-search-plugin/images/" . $image,
+		"text" => $text."/".$imdi_resource_access_level
+		);
 }
 
+function get_resource_icon($type) {
+	switch ($type) {
+		case "image/png": $icon = "png.png"; break;
+		case "image/tiff": $icon = "tiff.png"; break;
+		case "image/jpeg": $icon = "jpg.png"; break;
+		case "video/x-mpeg1": 
+		case "video/x-mpeg2":
+			$icon = "mpg.png";
+		break;
+		case "video/mp4": $icon = "mp4.png"; break;
+		case "audio/x-wav": $icon = "wav.png"; break;
+		case "text/x-eaf+xml": $icon = "imdi_eaf.png"; break;
+		case "application/pdf": $icon = "pdf.png"; break;
+		case "text/html": $icon = "html.png"; break;
+		default: $icon = "_blank.png";
+	}
 
+	return plugins_url() . "/IMDI-search-plugin/images/icons/" . $icon;
+}
 
 function get_session_details($url)
 {
 	$body = http_parse_message(http_get($url))->body;
     $xml = simplexml_load_string($body);
+    $xml->RegisterXPathNamespace("a", "http://www.mpi.nl/IMDI/Schema/IMDI");
     return $xml;
 
+}
+
+  function formatSizeUnits($bytes)
+    {
+        if ($bytes >= 1073741824)
+        {
+            $bytes = number_format($bytes / 1073741824, 2) . ' GB';
+        }
+        elseif ($bytes >= 1048576)
+        {
+            $bytes = number_format($bytes / 1048576, 2) . ' MB';
+        }
+        elseif ($bytes >= 1024)
+        {
+            $bytes = number_format($bytes / 1024, 2) . ' KB';
+        }
+        elseif ($bytes > 1)
+        {
+            $bytes = $bytes . ' bytes';
+        }
+        elseif ($bytes == 1)
+        {
+            $bytes = $bytes . ' byte';
+        }
+        else
+        {
+            $bytes = '0 bytes';
+        }
+
+        return $bytes;
 }
 
 /** Instantiate the class */

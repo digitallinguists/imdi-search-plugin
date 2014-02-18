@@ -1,33 +1,33 @@
 <!-- display details about one session -->
 
-<div class="session">
-	<div class="detailtabs">
+<div class="imdi_session">
+	<div class="imdi_detailtabs">
 		<ul class="">
 			{{# country}}
-				<li class="infoCountry"> 
-			 	<a href="#{{name}}_tabCountry"><img alt="Country" src="/images/map_marker-25.png" /> {{ . }}</a></li>
+				<li class="imdi_infoCountry"> 
+			 	<a href="#imdi_{{name}}_tabCountry"><img alt="Country" src="/images/map_marker-25.png" /> {{ . }}</a></li>
 			 {{/country}}
 			{{# languages}}
-				<li class="infoLanguages"> <span class="info_content"><a href="#{{name}}_tabLanguages"><img alt="Language" src=/images/speech_bubble-25.png />{{ . }}</a></span></li>
+				<li class="imdi_infoLanguages"> <span><a href="#imdi_{{name}}_tabLanguages"><img alt="Language" src=/images/speech_bubble-25.png />{{ . }}</a></span></li>
 			{{/ languages}}
 			{{# project}}
-				<li class="infoProject"><span class="info_content"><a href="#{{name}}_tabProject"><img alt="Project" src=/images/opened_folder-25.png />{{ . }}</a></span></li>
+				<li class="imdi_infoProject"><span><a href="#imdi_{{name}}_tabProject"><img alt="Project" src=/images/opened_folder-25.png />{{ . }}</a></span></li>
 			{{/ project}}
 		</ul>
 		{{# country }}
-			<div id="{{name}}_tabCountry">
+			<div id="imdi_{{name}}_tabCountry">
 				<p><b>Continent:</b> {{continent}}<br />
 				<b>Region:</b> {{region}}<br />
 				<b>Address:</b> {{address}}</p>
-				<div id="{{name}}_map" class="map"></div>
+				<div id="imdi_{{name}}_map" class="map"></div>
 			</div>
 		{{/ country }}
 		{{# languages}}
-			<div id="{{name}}_tabLanguages">		
+			<div id="imdi_{{name}}_tabLanguages">		
 			</div>
 		{{/ languages}}
 		{{# project}}
-			<div id="{{name}}_tabProject">
+			<div id="imdi_{{name}}_tabProject">
 				<b>{{project_title}}</b>
 				<p>{{project_desc}}</p>
 				<p><b>Contact</b><br />
@@ -38,10 +38,10 @@
 			</div>
 		{{/ project }}				
 	</div>
-	<div class="details">
+	<div class="imdi_details">
 		<h3>{{title}}</h3>
 		<p>{{description}}</p>
-		<ul>
+		<ul class="resources">
 			{{# resources}}
 				{{&.}}
 			{{/ resources}}

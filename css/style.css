@@ -60,7 +60,16 @@
 	padding-bottom: 53px;
 }
 
-F
+img.imdi_resource_icon {
+	width: 2em;
+}
+
+img.imdi_access_level_image {
+	width: 1em;
+	padding-left: 0.5em;
+	padding-bottom: 3px;
+	vertical-align: none;
+}
 /* Github Button Styling
 ------------------------------------------------------------ */
 

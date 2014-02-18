@@ -1,5 +1,6 @@
-<li style="list-style-image:url({{listimageURL}})">
-	{{&accessImage}}
+<li class="resource">
+	<img class="imdi_resource_icon" src="{{listimageURL}}" />
 <!-- 	<a style="vertical-align:super; " href="{{blogRoot}}?page_id={{videoPageID}}&amp;imdi_url={{imdiURL}}&amp;imdi_name={{imdiName}}&amp;imdi_access_level={{imdiAccessLevel}}&amp;imdi_session_name={{imdiSessionName}}&imdi_session_title={{imdiSessionTitle}}&amp;imdi_session_url={{imdiSessionURL}}">{{fileName}}</a> -->
-	<a style="vertical-align:super; " href="{{blogRoot}}?page_id={{videoPageID}}&amp;imdi_url={{imdiURL}}&amp;url={{url}}">{{fileName}}</a>
+	<a style="vertical-align:super; " href="{{blogRoot}}?page_id={{videoPageID}}&amp;imdi_url={{imdiURL}}&amp;filename={{fileName}}&amp;title={{title}}">{{fileName}}</a>
+	<img class="imdi_access_level_image" src="{{accessImage.src}}" title="{{accessImage.text}}" />
 </li>

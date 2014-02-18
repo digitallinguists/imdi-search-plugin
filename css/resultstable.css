@@ -1,22 +1,23 @@
-div.filter {
+div.imdi_filter {
 	border: 1px solid #c0c0c0;
 	float: right;
 }
 
 
-div.session:nth-of-type(odd) {
-	background: #eee;
+div.imdi_session:nth-of-type(odd) {
+	/*background: #96989A;*/
 }
 
-div.session {
+div.imdi_session {
 	overflow: auto;
 	clear: both;
+	padding: 1em;
 }
 
 
 
 
-div.details {
+div.imdi_details {
 	/*float: left;*/
 }
 
@@ -34,14 +35,17 @@ em {
 	font-weight:  bold;
 }
 
-.detailtabs {
+ div.imdi-category-tabs {
 	background: transparent;
 	border: none;
-	width: 45%;
-	float: right;
+	color: inherit !important;
 }
 
-.detailtabs .ui-widget-header { 
+.imdi-category-tabs .ui-state-active a, .ui-state-active a:link, .ui-state-active a:visited {
+	color: inherit;
+}
+
+.imdi-category-tabs .ui-widget-header { 
     background: transparent; 
     border: none; 
     border-bottom: 1px solid #c0c0c0; 
@@ -50,12 +54,38 @@ em {
     border-radius: 0px; 
 } 
 
-.detailtabs .ui-tabs-nav .ui-state-default {
+.imdi-category-tabs .ui-tabs-nav .ui-state-default {
 	background: transparent;
 	border: none;
 }
 
-.detailtabs .ui-tabs-nav .ui-state-active {
+.imdi-category-tabs .ui-tabs-nav .ui-state-active {
+	 background: transparent url(/images/tabarrow.png) no-repeat bottom center;
+	 border: none;
+}
+
+.imdi_detailtabs {
+	background: transparent;
+	border: none;
+	width: 45%;
+	float: right;
+}
+
+.imdi_detailtabs .ui-widget-header { 
+    background: transparent; 
+    border: none; 
+    border-bottom: 1px solid #c0c0c0; 
+    -moz-border-radius: 0px; 
+    -webkit-border-radius: 0px; 
+    border-radius: 0px; 
+} 
+
+.imdi_detailtabs .ui-tabs-nav .ui-state-default {
+	background: transparent;
+	border: none;
+}
+
+.imdi_detailtabs .ui-tabs-nav .ui-state-active {
 	 background: transparent url(/images/tabarrow.png) no-repeat bottom center;
 	 border: none;
 }
