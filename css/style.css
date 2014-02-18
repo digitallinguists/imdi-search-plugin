@@ -1,47 +1,20 @@
 /* Plugin Query Area
 ------------------------------------------------------------ */
 
-.wpcf7-form-control {
-	width: auto !important;
-	display: block;
-}
-
-.infoblock {
-	float: right;
-}
-
-.session {
-	padding: 1em;
-}
-
-#categories ul {
-	list-style: none;
-	padding-left: 0;
-}
-
-#sample-plugin-query {
-	margin: 20px 0;
-}
-
-#sample-plugin-query .left {
-	width: 35%;
-}
-
-#sample-plugin-query .left input {
-	padding-left: 5px;
-	padding-right: 5px;
-}
-
-#sample-plugin-query .right {
-	/*width: 62%;*/
-}
-
+/* the query buttons */
 #query-api, #query-api-advanced {
 	cursor: pointer;
 	margin: 0 0 0 5px;
 	vertical-align: middle;
 }
 
+/* the category lists*/
+#categories ul {
+	list-style: none;
+	padding-left: 0;
+}
+
+/* waiting spinner gif shown while searching */
 .waiting {
 	background: url(/images/waiting.gif) no-repeat scroll 0 0;
 	display: inline-block;
@@ -52,24 +25,96 @@
 	vertical-align: middle;
 }
 
+/* waiting spinner gif shown while loading autocomplete entries in advanced search */
 .ui-autocomplete-loading {
     background: white url('/images/waiting.gif') right center no-repeat;
   }
 
-.plugin-info {
-	padding-bottom: 53px;
+
+/* the query tabs */
+ div.imdi-category-tabs {
+	background: transparent;
+	border: none;
+	color: inherit !important;
 }
 
+.imdi-category-tabs .ui-state-active a, .ui-state-active a:link, .ui-state-active a:visited {
+	color: inherit;
+}
+
+.imdi-category-tabs .ui-widget-header { 
+    background: transparent; 
+    border: none; 
+    border-bottom: 1px solid #c0c0c0; 
+    -moz-border-radius: 0px; 
+    -webkit-border-radius: 0px; 
+    border-radius: 0px; 
+} 
+
+.imdi-category-tabs .ui-tabs-nav .ui-state-default {
+	background: transparent;
+	border: none;
+}
+
+.imdi-category-tabs .ui-tabs-nav .ui-state-active {
+	 background: transparent url(/images/tabarrow.png) no-repeat bottom center;
+	 border: none;
+}
+
+/* icons for resource entries */
 img.imdi_resource_icon {
 	width: 2em;
 }
-
 img.imdi_access_level_image {
 	width: 1em;
 	padding-left: 0.5em;
 	padding-bottom: 3px;
 	vertical-align: none;
 }
+
+/* Plugin Results Area
+------------------------------------------------------------ */
+
+/* one session result entry */
+div.imdi_session {
+	overflow: auto;
+	clear: both;
+	padding: 1em;
+}
+
+/* the detail tabs in each session */
+.imdi_detailtabs {
+	background: transparent;
+	border: none;
+	width: 45%;
+	float: right;
+}
+
+.imdi_detailtabs .ui-widget-header { 
+    background: transparent; 
+    border: none; 
+    border-bottom: 1px solid #c0c0c0; 
+    -moz-border-radius: 0px; 
+    -webkit-border-radius: 0px; 
+    border-radius: 0px; 
+} 
+
+.imdi_detailtabs .ui-tabs-nav .ui-state-default {
+	background: transparent;
+	border: none;
+}
+
+.imdi_detailtabs .ui-tabs-nav .ui-state-active {
+	 background: transparent url(/images/tabarrow.png) no-repeat bottom center;
+	 border: none;
+}
+
+/* the map in the country tab */
+.map {
+	width: 300px;
+	height: 100px;
+}
+
 /* Github Button Styling
 ------------------------------------------------------------ */
 
