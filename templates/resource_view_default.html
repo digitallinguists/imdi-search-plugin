@@ -1,9 +1,12 @@
 <div>
 <!-- 	<h1>{{session_name}} - {{session_title}}</h1>
- -->	<p>{{trans.project}}: {{project}}<br />
-	{{trans.country}}: {{country}}<br />
-	{{trans.languages}}: {{languages}}</p>
+ -->	 	<p>
+ 		{{# project}}{{trans.project}}: {{.}}<br />{{/ project}}
+		{{# country}}{{trans.country}}: {{.}}<br />{{/ country}}
+		{{# languages}}{{trans.languages}}: {{.}}{{/ languages}}
+	</p>
 	<p>{{session_desc}}</p>
-	<p>Get Resource: <a href="{{filename}}">{{filename}}</a> <i>({{trans.downloadInstructions}})</i></p>
-</div>
+	<p>{{trans.getResourceText}} <a href="{{filename}}">{{filename}}</a> ({{format}}{{# size}}, {{.}}{{/ size}})<br />
+	<i>{{trans.downloadInstructions}}</i></p>
+</div>	
 <p><a href="javascript:history.back()"> {{trans.goBackText}} </a></p>

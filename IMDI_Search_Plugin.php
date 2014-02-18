@@ -48,14 +48,14 @@ $m = NULL;
  
 function imdi_the_title( $title, $id ) {
 
-		if ($id == get_page_by_path("resource-page")->ID)
+		if ($id == get_page_by_path("imdi-resource")->ID)
 			return $_GET['title'];
 
 	return $title;
 }
 
 function imdi_wp_title( $title, $sep) {
-	if (is_page('resource-page'))
+	if (is_page('imdi-resource'))
 		return $_GET['title'];
 }
 add_filter( 'wp_title', 'imdi_wp_title', 10, 2 );
@@ -252,7 +252,8 @@ class IMDI_Search_Plugin {
 			'languages' => __('Languages', 'imdi'),
 			'file' => __('File', 'imdi'),
 			'goBackText' => __('Go back to search results', 'imdi'),
-			'downloadInstructions' => __('To download, right click on link and select \'Save as...\'')
+			'downloadInstructions' => __('To download, right click on link and select \'Save as...\''),
+			'getResourceText' => __('Get Resource:', 'imdi')
 			);
 	
 	
@@ -266,12 +267,13 @@ class IMDI_Search_Plugin {
 		$standard_params = array(
 					'project' =>  $session_details->Session->MDGroup->Project->Title,
 					'country' => $session_details->Session->MDGroup->Location->Country,
-					'languages' => $languages.(string)$resource_elem->Format,
+					'languages' => $languages,
 					'session_desc' => $session_details->Session->Description,
 					'filename' => http_build_url($_GET['imdi_url'], array("path"=>(string)$resource_elem->ResourceLink), HTTP_URL_JOIN_PATH),
 					'session_name' => $session_details->Session->Name,
 					'session_title' => $session_details->Session->Title,
-					'size'
+					'size' => ($resource_elem->Size > 0) ? formatSizeUnits($resource_elem->Size) : false,
+					'format' => $resource_elem->Format,
 					'trans' => $translated_text
 				);
 
@@ -922,7 +924,7 @@ function imdi_handle_resource($res, $imdi_session_url, $title) {
 	return $m->render('ressource_snippet', array(	'listimageURL' => get_resource_icon($res->format),
 													'accessImage' => get_access_image($res->access_level),
 													'blogRoot' => get_bloginfo('url'),
-													'videoPageID' => get_page_by_path("resource-page")->ID,
+													'videoPageID' => get_page_by_path("imdi-resource")->ID,
 													'imdiURL' => $imdi_session_url,
 													'fileName' => $res->name,
 													'title' => $title
