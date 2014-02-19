@@ -401,6 +401,8 @@ class IMDI_Search_Plugin {
 				'timeout'	=> 200)
 				);
 
+		//echo($query_string);
+
 		$response_code 	= wp_remote_retrieve_response_code( $request );
 		$response_body 	= wp_remote_retrieve_body( $request );
 		$response_xml = simplexml_load_string( $response_body );
@@ -467,7 +469,7 @@ class IMDI_Search_Plugin {
 		$response_body = http_parse_message($response)->body;
 
 
-		$response_xml = simplexml_load_string( $response_body );
+		$response_xml = simplexml_load_string( str_replace("&", "&amp;", $response_body));
 
 
 		//echo $response_body;
@@ -527,20 +529,20 @@ class IMDI_Search_Plugin {
 	}
 
 function ajax_toggle_save_session() {
-	global $_opt_imdi_user_saved_session;
+	// global $_opt_imdi_user_saved_session;
 
 
-	$session_url = $_GET['session_url'];
+	// $session_url = $_GET['session_url'];
 
-	if (imdi_session_saved($session_url)) {
-		// if session is already saved, delete it
-		delete_user_meta(get_current_user_id(), $_opt_imdi_user_saved_session, $session_url);
-		echo json_encode("<p>add bookmark</p>");
-	} else {
-		// else add it
-		add_user_meta(get_current_user_id(), $_opt_imdi_user_saved_session, $session_url);
-		echo json_encode("<p>remove bookmark</p>");
-	}
+	// if (imdi_session_saved($session_url)) {
+	// 	// if session is already saved, delete it
+	// 	delete_user_meta(get_current_user_id(), $_opt_imdi_user_saved_session, $session_url);
+	// 	echo json_encode("<p>add bookmark</p>");
+	// } else {
+	// 	// else add it
+	// 	add_user_meta(get_current_user_id(), $_opt_imdi_user_saved_session, $session_url);
+	// 	echo json_encode("<p>remove bookmark</p>");
+	// }
 
 	die();
 }
@@ -745,7 +747,7 @@ function generate_response_output ($xml) {
 		for ($i = 0; $i <= $number_of_pages; $i++) {
 			$pages[] = array(
 				"page_number" => $i + 1,
-				"page_link" => "?query=" . stripslashes($_GET['query']) . "&beginningAt=" . $i  * $max_results
+				"page_link" => "?query=" . rawurlencode(stripslashes($_GET['query'])) . "&beginningAt=" . $i  * $max_results
 			);
 		}
 

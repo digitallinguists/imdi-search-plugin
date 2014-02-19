@@ -130,32 +130,31 @@ jQuery(document).ready(function($){
 
 	$( ".imdi-category-tabs" ).tabs({ collapsible: true });
 
-	$(window).bind('statechange',function(){ 
+	if (History.enabled) {
+		if (!History.getState().data) {
+			if (_GET['query']) {
+				History.replaceState({query: _GET['query']});
+			}
+		}
+	}
 
+	if (!History.enabled) prefill_values(_GET);
+
+
+	$(window).bind('statechange',function(){ 
 		console.log("THE STATE");
 		//console.log(History.getState());
 
 		console.log("popp");
 		if (History.getState().data) {
-
 			//if (!(History.getState().data['new_request'] == true)) prefill_values(History.getState().data);
 
 			if (History.getState().data.query) {
 				var query_value = decodeURIComponent(History.getState().data.query);
-				imdiRequest(query_value);
+				var beginningAt = History.getState().data.beginningAt ? History.getState().data.beginningAt : 0;
+				prefill_values(History.getState().data);
+				imdiRequest(query_value, beginningAt);
 			}
-			// if (History.getState().data.constraints) {
-			// 	var constraints = History.getState().data.constraints;
-			// 	for (var i in constraints) {
-			// 		var constraintRow = advancedSearchAddConstraintRow(jQuery("#imdi-advanced-search"), (i==0));
-			// 		var itemString = 'advancedsearch';
-			// 		for (var j in constraints[i].index) {
-			// 			itemstring += ".group[" + constraints[i].index[j] + "]";
-			// 			advancedSearchAddGroup(itemString);
-			// 		}
-			// 	}
-				
-			// }
 		} 
 		
 	 });
@@ -164,22 +163,32 @@ jQuery(document).ready(function($){
 		if (History.enabled) {
 			e.preventDefault();
 			var query_string = getUrlVars(e.target.href)['query'];
-			History.pushState({query: query_string}, null, '/browse?query=' + query_string);
-		}	}
+			History.pushState({query: query_string, beginningAt: 0}, null, '/browse?query=' + query_string);
+		}	
+	}
+
+	function page_link_onclick(e) {
+		if (History.enabled) {
+			e.preventDefault();
+			var query_string = getUrlVars(e.target.href)['query'];
+			var beginningAt = getUrlVars(e.target.href)['beginningAt'];
+			History.pushState({query: query_string, beginningAt: beginningAt}, null, '/browse?query=' + query_string + "&beginningAt=" + beginningAt);
+		}	
+	}
 
 	$('#categories a').click(category_link_onclick);
 
-	$('#results-area').on("click", "div#toggle-save", function(){
-					alert("save");
-					toggleSaveRequest(this, $(this).children('#imdi_session_url').attr('value'));
-	});
+	// $('#results-area').on("click", "div#toggle-save", function(){
+	// 				alert("save");
+	// 				toggleSaveRequest(this, $(this).children('#imdi_session_url').attr('value'));
+	// });
 
 
 	/**
 	 * Perform the AJAX request when the user clicks the search button.
 	 */
 
-	 function imdiRequest(query_value) {
+	 function imdiRequest(query_value, beginningAt) {
 
 		/** Output a message and loading icon */
 
@@ -188,6 +197,7 @@ jQuery(document).ready(function($){
 		//$('#query-api').prop('disabled', true);
 		$('#results').after('<span class="waiting"></span>');
 
+		$('.search-results').empty();
 
 		/** Setup our AJAX request */
 		var opts = {
@@ -200,14 +210,19 @@ jQuery(document).ready(function($){
 				action: 'search_IMDI_archive',
 				nonce: imdi_archive_search_plugin_object.nonce,
 				query: query_value,
-				beginningAt:  (_GET && _GET['beginningAt']) ? _GET['beginningAt'] : 0
+				beginningAt:  (_GET && _GET['beginningAt']) ? _GET['beginningAt'] : beginningAt
 			},
 			success: function(response){
 
 
+				console.log(JSON.stringify(response));
+
 				/** Make sure to remove any previous error messages or data if we have any and append our data */
 
-				$('.search-results').empty().append(response.html);
+				$('.search-results').append(response.html);
+
+				$('#pageIndex a').click(page_link_onclick);
+
 
 				jQuery(".imdi_detailtabs").each(function(){jQuery(this).tabs(
 					{
@@ -367,9 +382,9 @@ jQuery(document).ready(function($){
 		var History = window.History;
 
 		if (History.enabled) {
-			History.pushState({query: query_value}, null, '/browse?query=' + query_value);
+			History.pushState({query: query_value, beginningAt: 0}, null, '/browse?query=' + query_value);
 		}
-		else imdiRequest(query_value);
+		else imdiRequest(query_value, 0);
 
 	});
 	$('body').on('click.searchIMDIarchive', '#query-api-advanced', function(e){
@@ -394,27 +409,21 @@ jQuery(document).ready(function($){
 			counter++;
 		}); 
 
-		console.log("CONSTRAINTS ");
-		console.log(constraints);
-
 		query_value = imdiURLEncode(query_value);
 
 		var History = window.History;
 
-			console.log("GETURLVARSDING for push: " + query_value);
-
-
 		if (History.enabled) {
-			History.pushState({query: query_value, constraints: constraints}, null, '/browse?query=' + query_value + "&constraints=" + encodeURIComponent(JSON.stringify(constraints)));
+			History.pushState({query: query_value, constraints: constraints, beginningAt: 0}, null, '/browse?query=' + query_value + "&constraints=" + encodeURIComponent(JSON.stringify(constraints)));
 		}
-		else imdiRequest(query_value);
+		else imdiRequest(query_value, 0);
 
 		console.log(advancedSearchBuildQuery());
 	});
 
 	if(_GET && _GET['query']) {
 		$('#imdi-query-value').val(_GET['query']);
-		imdiRequest(_GET['query']);
+		imdiRequest(_GET['query'], 0);
 	}
 
 	for (var i in imdi_archive_search_plugin_object.categories) {
@@ -623,16 +632,17 @@ jQuery(document).ready(function($){
 		// if first two letter of query string is "a:" then it is a cagegoty
 		// else a simple search
 		if (data['query']) {
-			if (data['query'].substr(0, 2) == "a:") {
+			if (decodeURIComponent(data['query']).substr(0, 2) == "a:") {
 				$( ".imdi-category-tabs" ).tabs( "option", "active", 0);
 			}
 		else 
 			$( ".imdi-category-tabs" ).tabs( "option", "active", 1);
+			$( "input#imdi-query-value" ).val(data['query']);
 		}
 	}
 	}
 
-	if (_GET) prefill_values(_GET);
+
 	
 	
 
