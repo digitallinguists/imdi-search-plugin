@@ -5,29 +5,29 @@
 		<ul class="">
 			{{# country}}
 				<li class="imdi_infoCountry"> 
-			 	<a href="#imdi_{{name}}_tabCountry"><img alt="Country" src="/images/map_marker-25.png" /> {{ . }}</a></li>
+			 	<a href="#imdi_{{id}}_tabCountry"><img alt="Country" src="{{plugin_url}}/images/map_marker-25.png" /> {{ . }}</a></li>
 			 {{/country}}
 			{{# languages}}
-				<li class="imdi_infoLanguages"> <span><a href="#imdi_{{name}}_tabLanguages"><img alt="Language" src=/images/speech_bubble-25.png />{{ . }}</a></span></li>
+				<li class="imdi_infoLanguages"> <span><a href="#imdi_{{id}}_tabLanguages"><img alt="Language" src="{{plugin_url}}/images/speech_bubble-25.png" />{{ . }}</a></span></li>
 			{{/ languages}}
 			{{# project}}
-				<li class="imdi_infoProject"><span><a href="#imdi_{{name}}_tabProject"><img alt="Project" src=/images/opened_folder-25.png />{{ . }}</a></span></li>
+				<li class="imdi_infoProject"><span><a href="#imdi_{{id}}_tabProject"><img alt="Project" src="{{plugin_url}}/images/opened_folder-25.png" />{{ . }}</a></span></li>
 			{{/ project}}
 		</ul>
 		{{# country }}
-			<div id="imdi_{{name}}_tabCountry">
+			<div id="imdi_{{id}}_tabCountry">
 				<p><b>Continent:</b> {{continent}}<br />
 				<b>Region:</b> {{region}}<br />
 				<b>Address:</b> {{address}}</p>
-				<div id="imdi_{{name}}_map" class="map"></div>
+				<div id="imdi_{{id}}_map" class="map"></div>
 			</div>
 		{{/ country }}
 		{{# languages}}
-			<div id="imdi_{{name}}_tabLanguages">		
+			<div id="imdi_{{id}}_tabLanguages">		
 			</div>
 		{{/ languages}}
 		{{# project}}
-			<div id="imdi_{{name}}_tabProject">
+			<div id="imdi_{{id}}_tabProject">
 				<b>{{project_title}}</b>
 				<p>{{project_desc}}</p>
 				<p><b>Contact</b><br />
@@ -39,7 +39,12 @@
 		{{/ project }}				
 	</div>
 	<div class="imdi_details">
-		<h3>{{title}}</h3>
+		{{# title }}
+			<h2>{{ . }}</h2>
+		{{/ title }}
+		{{^ title}}
+			<h2>{{ name }}</h2>
+		{{/ title }}
 		<p>{{description}}</p>
 		<ul class="resources">
 			{{# resources}}

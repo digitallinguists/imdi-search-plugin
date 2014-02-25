@@ -3,26 +3,79 @@ jQuery(document).ready(function($){
 var wavesurfer = Object.create(WaveSurfer);
 var elan = Object.create(WaveSurfer.ELAN);
 
-   elan.init({
-        url: 'http://ike.rrz.uni-koeln.de:2095/proxy.php?csurl=http://lac.uni-koeln.de/corpora/demo/pewi/Annotations/elan-example1.eaf',
-        container: '#annotations',
-        tiers: {
-            "W-IPA": true,
-            "W-RGMe": true
-        }
+if (typeof(imdi_elan_player_object) != 'undefined') {
+
+
+  
+   var audio_file = '';
+
+    wavesurfer.init({
+        container: '#wave',
+        waveColor: 'violet',
+        progressColor: 'purple'
     });
 
-wavesurfer.init({
-    container: '#wave',
-    waveColor: 'violet',
-    progressColor: 'purple'
-});
+    var progressBar = $('#progress-bar');
+    var initialWidth = $(progressBar).width();
 
-wavesurfer.load('http://ike.rrz.uni-koeln.de:2095/proxy.php?csurl=http://lac.uni-koeln.de/corpora/demo/pewi/Media/elan-example1.wav');
+    wavesurfer.on('loading', function (percent, xhr) {
+        $(progressBar).width((90/100) * percent + '%');
+    });
 
-$('#play').click(function() {
-	wavesurfer.play();
-});
+    $('#kickoff-overlay').click(function() {    
+
+           for (i = 0; i < imdi_elan_player_object.audio_files.length; i++) {
+
+                var testAudio = document.createElement('audio');
+
+                var canPlay = !!testAudio.canPlayType && "" != testAudio.canPlayType(imdi_elan_player_object.audio_files[i].type);
+
+                if (canPlay) {
+                    // $('#progress-bar').toggle();
+                    wavesurfer.load(imdi_elan_player_object.audio_files[i].url);
+                    break;
+                }
+           }
+    });
+
+     wavesurfer.on('ready', function () {
+        
+        $('#kickoff-overlay').toggle();
+        $('#progress-bar').toggle();
+
+        var timeline = Object.create(WaveSurfer.Timeline);
+
+        timeline.init({
+            wavesurfer: wavesurfer,
+            container: "#wave-timeline"
+        });
+
+           elan.init({
+        url: imdi_elan_player_object.eaf_url,
+        container: '#annotations',
+        // tiers: {
+        //     "W-IPA": true,
+        //     "W-RGMe": true
+        // }
+    });
+    });
+
+    $('#pause').toggle();
+
+    $('#play').click(function(e) {
+        e.preventDefault();
+
+    	wavesurfer.play();
+        $(this).toggle();
+        $('#pause').toggle();
+    });
+    $('#pause').click(function(e) {
+        e.preventDefault();
+        wavesurfer.pause();
+        $(this).toggle();
+        $('#play').toggle();
+    });
+}
 
     elan.on('ready', function () {
         var classList = elan.container.querySelector('table').classList;

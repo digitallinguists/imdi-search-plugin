@@ -1,0 +1,43 @@
+
+span#categoryFields {
+	padding: 5px;
+	margin: 2px;
+	border: 1px dashed grey; overflow:hidden; zoom: 1;
+	display: inline-block;
+	float: left;
+	clear: left;
+}
+
+span#itemFields {
+	float: left; clear:left; overflow:hidden; zoom: 1;
+	display: inline-block;
+}
+
+div.itemsDiv {
+	padding-left: 6em;
+}
+
+.editButton {
+	float: top;
+}
+
+
+.editButtons {
+	float: left; 
+	clear:right;
+}
+
+div .fieldblock {
+	float: left;
+	display: block;
+}
+
+div .wideInput {
+}
+
+input#categoryField {
+}
+
+div .wideInput input {
+	width: 50em;
+}

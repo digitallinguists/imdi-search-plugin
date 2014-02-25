@@ -163,7 +163,7 @@ jQuery(document).ready(function($){
 		if (History.enabled) {
 			e.preventDefault();
 			var query_string = getUrlVars(e.target.href)['query'];
-			History.pushState({query: query_string, beginningAt: 0}, null, '/browse?query=' + query_string);
+			History.pushState({query: query_string, beginningAt: 0}, null, UpdateQueryString("query", query_string));
 		}	
 	}
 
@@ -172,7 +172,7 @@ jQuery(document).ready(function($){
 			e.preventDefault();
 			var query_string = getUrlVars(e.target.href)['query'];
 			var beginningAt = getUrlVars(e.target.href)['beginningAt'];
-			History.pushState({query: query_string, beginningAt: beginningAt}, null, '/browse?query=' + query_string + "&beginningAt=" + beginningAt);
+			History.pushState({query: query_string, beginningAt: beginningAt}, null, UpdateQueryString("query", query_string, UpdateQueryString("beginningAt", beginningAt)));
 		}	
 	}
 
@@ -195,7 +195,8 @@ jQuery(document).ready(function($){
 		var default_text = $('#query-api').val();
 		$('#query-api').val(imdi_archive_search_plugin_object.searching);
 		//$('#query-api').prop('disabled', true);
-		$('#results').after('<span class="waiting"></span>');
+		//$('#results').after(jQuery('<span class="waiting"></span>').css('background-image', "url('" + imdi_archive_search_plugin_object.plugin_url + "images/downarrow.png')");
+		$('<span>').addClass('waiting').css('background-image', "url('" + imdi_archive_search_plugin_object.plugin_url + "images/waiting.gif')").appendTo('#results');
 
 		$('.search-results').empty();
 
@@ -214,8 +215,6 @@ jQuery(document).ready(function($){
 			},
 			success: function(response){
 
-
-				console.log(JSON.stringify(response));
 
 				/** Make sure to remove any previous error messages or data if we have any and append our data */
 
@@ -253,6 +252,8 @@ jQuery(document).ready(function($){
 						}
 					})
 				});
+
+ 				jQuery(".imdi_detailtabs .ui-tabs-nav .ui-state-active").css('background-image', "url('" + imdi_archive_search_plugin_object.plugin_url + "images/tabarrow.png')");
 				
 				/** Remove the loading icon and replace the button with default text */
 				$('.waiting').remove();
@@ -382,7 +383,7 @@ jQuery(document).ready(function($){
 		var History = window.History;
 
 		if (History.enabled) {
-			History.pushState({query: query_value, beginningAt: 0}, null, '/browse?query=' + query_value);
+			History.pushState({query: query_value, beginningAt: 0}, null, UpdateQueryString("query", query_string));
 		}
 		else imdiRequest(query_value, 0);
 
@@ -414,7 +415,7 @@ jQuery(document).ready(function($){
 		var History = window.History;
 
 		if (History.enabled) {
-			History.pushState({query: query_value, constraints: constraints, beginningAt: 0}, null, '/browse?query=' + query_value + "&constraints=" + encodeURIComponent(JSON.stringify(constraints)));
+			History.pushState({query: query_value, constraints: constraints, beginningAt: 0}, null, UpdateQueryString("query", query_value, UpdateQueryString("constraints",  encodeURIComponent(JSON.stringify(constraints)))));
 		}
 		else imdiRequest(query_value, 0);
 
@@ -516,14 +517,20 @@ jQuery(document).ready(function($){
 					success: function(json) {
 						console.log(json);
 						jQuery(inputField).autocomplete({
-							source: json
+							source: json,
+							minLength: 0
 						});
 						$(inputField).removeClass('ui-autocomplete-loading');
+						$(inputField).css('background-image', "url('" + imdi_archive_search_plugin_object.plugin_url + "images/downarrow.png')");
+						$(inputField).css('background-position', "right center");
+						$(inputField).css('background-repeat', "no-repeat");
+
+						$(inputField).bind('click', function(){ $(this).autocomplete("search"); console.log("sörch") } );
 					},
 					error: function(json) {
 						console.log("autocomplete occurrences error");
 						console.log(json);
-						$(inputField).removeClass('ui-autocomplete-loading');
+						$(inputField).removeClass('ui-autocomplete-loading');						
 					}
 				});			
 			}
@@ -658,6 +665,35 @@ jQuery(document).ready(function($){
 
 
 /** Helpers */
+
+function UpdateQueryString(key, value, url) {
+    if (!url) url = window.location.href;
+    var re = new RegExp("([?&])" + key + "=.*?(&|#|$)(.*)", "gi");
+
+    if (re.test(url)) {
+        if (typeof value !== 'undefined' && value !== null)
+            return url.replace(re, '$1' + key + "=" + value + '$2$3');
+        else {
+            var hash = url.split('#');
+            url = hash[0].replace(re, '$1$3').replace(/(&|\?)$/, '');
+            if (typeof hash[1] !== 'undefined' && hash[1] !== null) 
+                url += '#' + hash[1];
+            return url;
+        }
+    }
+    else {
+        if (typeof value !== 'undefined' && value !== null) {
+            var separator = url.indexOf('?') !== -1 ? '&' : '?',
+                hash = url.split('#');
+            url = hash[0] + separator + key + '=' + value;
+            if (typeof hash[1] !== 'undefined' && hash[1] !== null) 
+                url += '#' + hash[1];
+            return url;
+        }
+        else
+            return url;
+    }
+}
 
 function imdiURLEncode(string) {
 	return encodeURIComponent(string).replace(/\*/g, '%2A').replace(/\(/g, '%28').replace(/\)/g, '%29');

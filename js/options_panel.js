@@ -8,31 +8,34 @@ jQuery(document).ready(function(elem){
 	}
 
 	function appendEditButtonSet(div) {
-		var removeLink = jQuery("<p style='float:bottom;'>remove</p>", {id: "imdi_remove_cat", href: "#"});
+		var removeLink = jQuery("<a class='editButton' href='#'><p>remove<p></a>", {id: "imdi_remove_cat", href: "#"});
 			jQuery(removeLink).click(function (e) {
 				e.preventDefault();
 				jQuery(this).parents("#categoryFields").remove();
 			});
 
-			var upLink = jQuery("<p style='float:bottom;'>move up</p>", {id: "imdi_remove_cat", href: "#"});
+			var upLink = jQuery("<a class='editButton' href='#'><p>move up</p></a>", {id: "imdi_remove_cat", href: "#"});
 			jQuery(upLink).click(function (e) {
 				e.preventDefault();
 				jQuery(this).parents("#categoryFields").prev("#categoryFields").before(jQuery(this).parents("#categoryFields"));
 			});
 
-			var downLink = jQuery("<p style='float:bottom;'>move down</p>", {id: "imdi_remove_cat", href: "#"});
+			var downLink = jQuery("<a class='editButton' href='#'><p>move down</p></a>", {id: "imdi_remove_cat", href: "#"});
 			jQuery(downLink).click(function (e) {
 				e.preventDefault();
 				jQuery(this).parents("#categoryFields").next("#categoryFields").after(jQuery(this).parents("#categoryFields"));
 			});
 
-		jQuery(div).append(jQuery("<div style='float: left; clear:right;'></div>").append(upLink, downLink, removeLink));
+		jQuery(div).append(jQuery("<div class='editButtons'></div>").append(upLink, downLink, removeLink));
 	}
 
 	function makeOccurrencesCategoryRow(category) {
 
 
-		var div = jQuery("<div>", {id: "categoryFields", style: "clear:both; border: 1px dashed grey; overflow:hidden; zoom: 1;"});
+		var div = jQuery("<span>", {id: "categoryFields"});
+
+		appendEditButtonSet(div);			
+
 
 		var typeList = jQuery("<select>", {id: "categoryField", type: "select", name: "type", size: "1"});
 			jQuery(typeList).append(jQuery("<option>", {selected: true}).text("occurrences"));
@@ -42,37 +45,38 @@ jQuery(document).ready(function(elem){
 
 
 
-		jQuery(div).append(jQuery("<div style='float: left; display:block;'><p>Type</p></div>").append(typeList));
+		jQuery(div).append(jQuery("<div class='fieldblock'><p>Type</p></div>").append(typeList));
 
 		var nameField = jQuery("<input>", { id: "categoryField", type: "text", name: "name", value: category['name']});
 		var pathField = jQuery("<input>", { id: "categoryField", type: "text", name: "path", value: category['path']});
 
 	
-		jQuery(div).append(jQuery("<div style='float: left;'><p>Category Name</p></div>").append(nameField));
-		jQuery(div).append(jQuery("<div style='float: left;'><p>Path</p></div>").append(pathField));
-
-		appendEditButtonSet(div);			
+		jQuery(div).append(jQuery("<div class='fieldblock'><p>Category Name</p></div>").append(nameField));
+		jQuery(div).append(jQuery("<div class='fieldblock wideInput'><p>Path</p></div>").append(pathField));
 
 		return div;
 	}
 
 	function makePredefinedCategoryRow(category)
 	{
-		var div = jQuery("<div>", {id: "categoryFields", style: "clear:both; border: 1px dashed grey; overflow:hidden; zoom: 1;"});
+		var div = jQuery("<span>", {id: "categoryFields"});
+
+		appendEditButtonSet(div);
+
 
 		var typeList = jQuery("<select>", {id: "categoryField", type: "select", name: "type", size: "1"});
 			jQuery(typeList).append(jQuery("<option>").text("occurrences"));
 			jQuery(typeList).append(jQuery("<option>", {selected: true}).text("predefined"));
 
  		jQuery(typeList).change(onTypeListChange);
- 		jQuery(div).append(jQuery("<div style='float: left; display:block;'><p>Type</p></div>").append(typeList));
+ 		jQuery(div).append(jQuery("<div class='fieldblock'><p>Type</p></div>").append(typeList));
 		
 		
 
 		var nameField = jQuery("<input>", { id: "categoryField", type: "text", name: "name", value: category['name']});
- 		jQuery(div).append(jQuery("<div style='float: left; display:block;'><p>Category Name</p></div>").append(nameField));
+ 		jQuery(div).append(jQuery("<div class='fieldblock'><p>Category Name</p></div>").append(nameField));
 
-		var itemsDiv = jQuery("<div style='display:block';><p style='clear:both;'><b>Items</b></p></div>");
+		var itemsDiv = jQuery("<div class='itemsDiv'><p style='clear:both;'><b>Items</b></p></div>");
 
 		addItemLink = jQuery("<a>Add Item</a>", {href :"#", id:"imdi_add_item"} );
 		addItemLink.click(function(e) {
@@ -83,7 +87,6 @@ jQuery(document).ready(function(elem){
 			itemsDiv.append(makePredefinedItem(category['items'][i]));
 		}
 
-		appendEditButtonSet(div);
 
 
 		itemsDiv.append(addItemLink);
@@ -95,13 +98,13 @@ jQuery(document).ready(function(elem){
 	}
 
 	function makePredefinedItem(item) {
-		var div = jQuery("<div>", {id: "itemFields", style: "clear:both; overflow:hidden; zoom: 1;"});
+		var div = jQuery("<span>", {id: "itemFields"});
 
 		var itemNameField = jQuery("<input>", { id: "itemField", type: "text", name: "name", value: item['name']});
-		jQuery(div).append(jQuery("<div style='float: left; display:block;'><p>Name</p></div>").append(itemNameField));
+		jQuery(div).append(jQuery("<div class='fieldblock'><p>Name</p></div>").append(itemNameField));
 
-		var queryField = jQuery("<input>", { id: "itemField", type: "text", name: "query", value: item['query']});
-		jQuery(div).append(jQuery("<div style='float: left; display:block;'><p>Query</p></div>").append(queryField));
+		var queryField = jQuery("<input>", { id: "itemField", type: "text", name: "query", value: decodeURIComponent(item['query'])});
+		jQuery(div).append(jQuery("<div class='fieldblock wideInput'><p>Query</p></div>").append(queryField));
 	
 			var removeLink = jQuery("<p><a>remove</a></p>", {id: "imdi_remove_cat", href: "#"});
 			jQuery(removeLink).click(function (e) {
@@ -127,7 +130,7 @@ jQuery(document).ready(function(elem){
 	jQuery( "form#imdi_options" ).submit(function( event ) {
   		var a_categories = new Array();
 
-  		jQuery("div#categoryFields").each(function() {
+  		jQuery("span#categoryFields").each(function() {
 			var a_category = {};
 			jQuery(this).children("div").children("#categoryField").each(function(event) {
 				a_category[jQuery(this).attr("name")] = jQuery(this).attr("value");
@@ -140,7 +143,9 @@ jQuery(document).ready(function(elem){
 					console.log(jQuery(this).html());
 					var a_item = {};
 					 jQuery(this).children("div").children("#itemField").each(function() {
-					 	a_item[jQuery(this).attr("name")] = jQuery(this).attr("value");
+					 	var value = jQuery(this).attr("value");
+					 	if (jQuery(this).attr("name") == 'query') value = encodeURIComponent(value); 
+					 	a_item[jQuery(this).attr("name")] =  value;
 					 });
 					 a_items.push(a_item);
 				});

@@ -1,3 +1,52 @@
+/* ELAN Player
+------------------------------------------------------------ */
+
+#annotations {
+	height:50%;
+	overflow-y: scroll;
+}
+
+#wave {
+    position: relative;
+}
+
+#progress-bar {
+	 background-color: black; 
+    position: absolute;
+    z-index: 10;
+    left: 0;
+    top: 50%;
+    margin-top: -10px;
+    left: 5%;
+    width: 0;
+    height: 10px;
+}
+
+#kickoff-overlay {
+	top: 30%;
+    position: absolute;
+    z-index: 10;
+    left: 0;
+    width: 99%;
+    height: 100%;
+    text-align:  center;
+    font-size: 3em;
+    font-weight: bold;
+}
+
+#play, #pause {
+	font-size: 1.5em;
+	padding: 10px 0px 10px 0px;
+}
+
+#annotations td {
+	padding: 4px 2px 4px 2px;
+}
+
+#annotations th {
+	padding: 4px 2px 10px 2px;
+}
+
 /* Plugin Query Area
 ------------------------------------------------------------ */
 
@@ -11,12 +60,16 @@
 /* the category lists*/
 #categories ul {
 	list-style: none;
-	padding-left: 0;
+	padding-right: 1em;
+}
+
+#categories li {
+	margin: 0;
 }
 
 /* waiting spinner gif shown while searching */
 .waiting {
-	background: url(/images/waiting.gif) no-repeat scroll 0 0;
+	background: no-repeat scroll 0 0;
 	display: inline-block;
 	height: 16px;
 	margin-left: 5px;
@@ -26,6 +79,11 @@
 }
 
 /* waiting spinner gif shown while loading autocomplete entries in advanced search */
+
+.ui-autocomplete-loaded {
+	 background: white url('/images/waiting.gif') right center no-repeat;
+}
+
 .ui-autocomplete-loading {
     background: white url('/images/waiting.gif') right center no-repeat;
   }
@@ -34,16 +92,17 @@
 /* the query tabs */
  div.imdi-category-tabs {
 	background: transparent;
+	color: black;
 	border: none;
-	color: inherit !important;
 }
 
 .imdi-category-tabs .ui-state-active a, .ui-state-active a:link, .ui-state-active a:visited {
-	color: inherit;
+	color: black;
 }
 
 .imdi-category-tabs .ui-widget-header { 
     background: transparent; 
+    color: black;
     border: none; 
     border-bottom: 1px solid #c0c0c0; 
     -moz-border-radius: 0px; 
@@ -51,17 +110,28 @@
     border-radius: 0px; 
 } 
 
+.imdi-category-tabs .ui-widget-header a {
+	color: black;
+}
+
+.ui-tabs .ui-tabs-nav .ui-tabs-anchor {
+	padding: 4px;
+}
+
 .imdi-category-tabs .ui-tabs-nav .ui-state-default {
-	background: transparent;
+	background: transparent; 
+	color: black;
 	border: none;
 }
 
 .imdi-category-tabs .ui-tabs-nav .ui-state-active {
-	 background: transparent url(/images/tabarrow.png) no-repeat bottom center;
+ 	 background: transparent no-repeat bottom center; 
 	 border: none;
+	 color: black;
+	 text-decoration: underline;
 }
 
-/* icons for resource entries */
+/* icons for resource entries 
 img.imdi_resource_icon {
 	width: 2em;
 }
@@ -82,30 +152,40 @@ div.imdi_session {
 	padding: 1em;
 }
 
+div.imdi_details  h2 {
+ display: inline;
+}
+
 /* the detail tabs in each session */
 .imdi_detailtabs {
-	background: transparent;
+	 background: transparent; 
 	border: none;
-	width: 45%;
 	float: right;
+	padding: 0 2em 2em 2em;
+	width: 45%;
+}
+
+.imdi_detailtabs h2  {
+
 }
 
 .imdi_detailtabs .ui-widget-header { 
-    background: transparent; 
+     background: transparent;  
     border: none; 
-    border-bottom: 1px solid #c0c0c0; 
+    border-bottom: 1px solid /* #c0c0c0 */; 
     -moz-border-radius: 0px; 
     -webkit-border-radius: 0px; 
     border-radius: 0px; 
+    font-size: small;
 } 
 
 .imdi_detailtabs .ui-tabs-nav .ui-state-default {
-	background: transparent;
+	 background: transparent; 
 	border: none;
 }
 
 .imdi_detailtabs .ui-tabs-nav .ui-state-active {
-	 background: transparent url(/images/tabarrow.png) no-repeat bottom center;
+	 background: transparent no-repeat bottom center; 
 	 border: none;
 }
 
@@ -117,5 +197,3 @@ div.imdi_session {
 
 /* Github Button Styling
 ------------------------------------------------------------ */
-
-.button{position:relative;top:-1px;overflow:visible;display:inline-block;padding:1em 2em;border:1px solid #d4d4d4;margin:0;text-decoration:none;text-align:center;text-shadow:1px 1px 0 #fff;font:11px/normal sans-serif;color:#333 !important;white-space:nowrap;cursor:pointer;outline:0;background-color:#ececec;background-image:-webkit-gradient(linear,0 0,0 100%,from(#f4f4f4),to(#ececec));background-image:-moz-linear-gradient(#f4f4f4,#ececec);background-image:-ms-linear-gradient(#f4f4f4,#ececec);background-image:-o-linear-gradient(#f4f4f4,#ececec);background-image:linear-gradient(#f4f4f4,#ececec);-moz-background-clip:padding;background-clip:padding-box;border-radius:.2em;zoom:1;*display:inline}.button:hover,.button:focus,.button:active,.button.active{border-color:#3072b3;border-bottom-color:#2a65a0;text-decoration:none;text-shadow:-1px -1px 0 rgba(0,0,0,0.3);color:#fff !important;background-color:#3c8dde;background-image:-webkit-gradient(linear,0 0,0 100%,from(#599bdc),to(#3072b3));background-image:-moz-linear-gradient(#599bdc,#3072b3);background-image:-o-linear-gradient(#599bdc,#3072b3);background-image:linear-gradient(#599bdc,#3072b3)}.button:active,.button.active{border-color:#2a65a0;border-bottom-color:#3884cd;background-color:#3072b3;background-image:-webkit-gradient(linear,0 0,0 100%,from(#3072b3),to(#599bdc));background-image:-moz-linear-gradient(#3072b3,#599bdc);background-image:-ms-linear-gradient(#3072b3,#599bdc);background-image:-o-linear-gradient(#3072b3,#599bdc);background-image:linear-gradient(#3072b3,#599bdc)} .button::-moz-focus-inner{padding:0;border:0}

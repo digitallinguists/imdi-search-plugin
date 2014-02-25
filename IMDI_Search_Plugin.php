@@ -37,7 +37,29 @@ Text Domain: imdi
  * @author	Paul Trilsbeek & Alex König
  */
  
+
+
+
  require 'IMDI_settings.php';
+
+
+function imdi_activation_hook() {
+	if (get_option('a_imdi_categories') == '') 	
+		update_option('a_imdi_categories', array(
+					array(
+						'name' => "Countries",
+						'type' => "occurrences",
+						'path' => "Session.MDGroup.Location.Country"
+						),
+					array(
+						'name' => "Projects",
+						'type' => "occurrences",
+						'path' => "Session.MDGroup.Project.Name"
+						)
+				)
+	);
+}
+register_activation_hook(__FILE__, 'imdi_activation_hook');
 
 
 // Initialize mustache template engine
@@ -143,6 +165,7 @@ class IMDI_Search_Plugin {
 			'searching'	=> __( 'Searching the archive...', 'imdi' ),
 			'spinner'	=> admin_url( 'images/loading.gif' ),
 			'url'		=> admin_url( 'admin-ajax.php' ),
+			'plugin_url' => plugins_url('//IMDI-search-plugin//'),
 			'categories' => get_option($_opt_imdi_categories)
 		);
 
@@ -157,6 +180,7 @@ class IMDI_Search_Plugin {
 		/** Register wavesurfer for ELAN player */
 		wp_register_script( 'wavesurfer', plugins_url( '/js/wavesurfer/wavesurfer.min.js', __FILE__ ));
 		wp_register_script( 'wavesurfer-elan', plugins_url( '/js/wavesurfer/wavesurfer.elan.js', __FILE__ ));
+		wp_register_script( 'wavesurfer-timeline', plugins_url( '/js/wavesurfer/wavesurfer.timeline.js', __FILE__ ));
 		wp_register_script( 'elan-player', plugins_url( '/js/elan-player.js', __FILE__ ));
 
 		/** history.js for legacy browser history control */
@@ -169,7 +193,7 @@ class IMDI_Search_Plugin {
 
 		/** jQuery UI components */
 		wp_register_script( 'jquery-ui', plugins_url( '/vendor/js/jquery-ui-1.10.4.custom.min.js', __FILE__ ));
-		wp_register_style('jquery-ui', plugins_url( '/vendor/css/ui-lightness/jquery-ui-1.10.4.custom.css', __FILE__ ));
+		wp_register_style('jquery-ui', plugins_url( '/vendor/css/imdi-theme/jquery-ui-1.10.4.custom.css', __FILE__ ));
 	
 /** register maps plugin */
 		wp_register_script( 'leaflet_maps', 'http://cdn.leafletjs.com/leaflet-0.7.2/leaflet.js');
@@ -185,6 +209,8 @@ class IMDI_Search_Plugin {
 	 */
 	public function shortcode() {
 
+		wp_enqueue_script('jquery');
+
 		wp_enqueue_script('jquery-ui');
 		wp_enqueue_style('jquery-ui');
 	
@@ -196,8 +222,6 @@ class IMDI_Search_Plugin {
 
 		wp_enqueue_script('leaflet_maps');
 		wp_enqueue_style('leaflet_maps');
-
-		wp_enqueue_style('responsive_tables');
 
 		
 		$m = new Mustache_Engine(array(
@@ -237,6 +261,10 @@ class IMDI_Search_Plugin {
 	}
 
 	public function shortcode_resourcepage($atts) {
+
+		wp_enqueue_script( 'jquery' );
+		wp_enqueue_style( 'imdi-archive-search-plugin' );
+
 
 		$session_details = get_session_details($_GET["imdi_url"]);
 		$xpath = '/a:METATRANSCRIPT/a:Session/a:Resources/*/a:ResourceLink[contains(., "' . $_GET['filename'] . '")]/..';
@@ -295,10 +323,31 @@ class IMDI_Search_Plugin {
 			case strpos((string)$resource_elem->Format, "eaf")>0: {
 				wp_enqueue_script('wavesurfer');
 				wp_enqueue_script('wavesurfer-elan');
+				wp_enqueue_script('wavesurfer-timeline');
+
+
+				$audio_files = array();
+				$file_types = array("audio/mp4", "audio/mp3", "audio/mpeg", "audio/ogg", "audio/x-wav", "video/mp4", "video/mpeg", "video/avi");
+				foreach ($file_types as $type) {
+					foreach($session_details->Session->Resources->MediaFile as $media_file) {
+						if ($media_file->Format == $type) $audio_files[] = array (
+								"url" => plugins_url("IMDI-search-plugin") . "/csproxy.php?csurl=" . 
+									http_build_url($_GET['imdi_url'], array("path"=>(string)$media_file->ResourceLink), HTTP_URL_JOIN_PATH),
+								"type" => $type
+							);
+					}
+				}
+
+
+				wp_localize_script('elan-player', 'imdi_elan_player_object', array(
+						"audio_files" => $audio_files,
+						"eaf_url" => plugins_url("IMDI-search-plugin") . "/csproxy.php?csurl=" . $standard_params['filename']
+					));
 				wp_enqueue_script('elan-player');
 
 				$standard_params['trans'] = array_merge($standard_params['trans'], array(
-						"play" => __("Play", "imdi")
+						"play" => __("Play", "imdi"),
+						"pause" => __("Pause", "imdi")
 					));
 
 				return $m->render('resource_view_eaf', $standard_params);
@@ -579,9 +628,13 @@ function ajax_toggle_save_session() {
 
       
 	    	$a = array();
+	    	
+	    	$a['plugin_url'] = plugins_url('//IMDI-search-plugin//');
 
             $a['name'] = $session_details->Session->Name;
+            $a['id'] = str_replace(' ', '', $session_details->Session->Name);
             $a['title']= $session_details->Session->Title;
+            	if ($a['title'] == '') $a[title] = false; 
 	 
 
 
@@ -952,6 +1005,8 @@ function get_access_image($imdi_resource_access_level) {
                     	$image = "access_level_4.png";
                         $text = __('Access level 4: not accessible', 'imdi');
                     break;
+                    default:
+                    	return false;
 		}
 
 	return array(

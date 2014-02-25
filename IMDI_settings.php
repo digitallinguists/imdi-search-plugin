@@ -13,19 +13,10 @@ $_opt_imdi_user_saved_session = 'imdi_user_saved_session';
 add_action('admin_menu', 'add_imdisearch_options');
 
 
+
+
 // set a standard set of categories on first run
-if (!get_option($_opt_imdi_categories))
-	update_option($_opt_imdi_categories, array(
-					array(
-						'name' => "Countries",
-						'path' => "Session.MDGroup.Location.Country"
-						),
-					array(
-						'name' => "Projects",
-						'path' => "Session.MDGroup.Project.Name"
-						)
-				)
-	);
+
 // Options hook
 function add_imdisearch_options() {
     if (function_exists('add_options_page')) {
@@ -36,8 +27,10 @@ function add_imdisearch_options() {
 
 function options_enqueue() { 
 		wp_register_script( 'imdi-archive-options', plugins_url( '/js/options_panel.js', __FILE__ ), array( 'jquery' ), '0.1.0', true );
+		wp_register_style( 'imdi-archive-options', plugins_url( '/css/imdi_settings.css', __FILE__ ) );
 
     wp_enqueue_script( 'imdi-archive-options' );
+    wp_enqueue_style( 'imdi-archive-options' );
 }
 add_action( 'admin_enqueue_scripts', 'options_enqueue' );
 
@@ -100,6 +93,9 @@ function _show_imdisearch_form() {
 <td><input type="text" name="imdi_max_results" id="imdi_max_results" size="7" value="<?php form_option('st_imdi_max_results'); ?>"/></td>
 </tr>
 </table>
+
+<h2>Categories</h2>
+
 <?php 	//echo var_dump(get_option('a_imdi_categories'));?>
 
 <div id="categories" style:"clear: both;">
