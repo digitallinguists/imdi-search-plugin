@@ -38,9 +38,9 @@ Text Domain: imdi
  */
  
 
-
-
  require 'IMDI_settings.php';
+
+
 
 
 function imdi_activation_hook() {
@@ -67,6 +67,8 @@ require 'mustache.php/src/Mustache/Autoloader.php';
 Mustache_Autoloader::register();
 
 $m = NULL;
+
+$wp_session = NULL;
  
 function imdi_the_title( $title, $id ) {
 
@@ -148,6 +150,14 @@ class IMDI_Search_Plugin {
 		add_shortcode( 'imdi-archive-simplesearch', array( $this, 'shortcode_simplesearch'));
 		add_shortcode( 'imdi-archive-resource-page', array($this, 'shortcode_resourcepage'));
 		add_shortcode( 'imdi-archive-user-bookmarks', array($this, 'shortcode_userbookmarks'));
+$wp_session = WP_Session::get_instance();
+
+if (!$wp_session['archive_url']) {
+	$wp_session['archive_url'] = "http://lac.uni-koeln.de/";
+	$wp_session['servlet_url'] = $wp_session['archive_url'] + "ds/imdi_search/servlet"; 
+}
+
+
 	}
 	
 	/**
@@ -405,8 +415,11 @@ class IMDI_Search_Plugin {
 		global $_opt_imdi_topnode;
 		global $_opt_imdi_max_results;
 
+		$wp_session = WP_Session::get_instance();
+
+
     	$query_topnode = get_option($_opt_imdi_topnode);
-    	$servlet_url = get_option($_opt_imdi_servlet_url);
+    	$servlet_url = $wp_session['servlet_url']; //get_option($_opt_imdi_servlet_url);
 		$max_results = get_option($_opt_imdi_max_results);
 
 		if ( ! isset( $_GET['beginningAt'] ) || isset( $_GET['beginningAt'] ) && empty( $_GET['beginningAt'] ) )
@@ -485,8 +498,10 @@ class IMDI_Search_Plugin {
 		global $_opt_imdi_servlet_url;
 		global $_opt_imdi_topnode;
 
+		$wp_session = WP_Session::get_instance();
+
 		$query_topnode = get_option($_opt_imdi_topnode);
-    	$servlet_url = get_option($_opt_imdi_servlet_url);
+    	$servlet_url = $wp_session['servlet_url'];
 
     	if ( ! isset( $_GET['path'] ) || isset( $_GET['path'] ) && empty( $_GET['path'] ) )
 			die( __( 'Get ocurrences: no path', 'imdi' ) );

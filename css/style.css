@@ -131,6 +131,10 @@
 	 text-decoration: underline;
 }
 
+.imdi-category-tabs .ui-tabs-panel {
+	padding: 1em 8px;
+}
+
 /* icons for resource entries 
 img.imdi_resource_icon {
 	width: 2em;
@@ -179,6 +183,10 @@ div.imdi_details  h2 {
     font-size: small;
 } 
 
+.imdi_detailtabs .ui-tabs-nav {
+
+}
+
 .imdi_detailtabs .ui-tabs-nav .ui-state-default {
 	 background: transparent; 
 	border: none;
@@ -187,6 +195,24 @@ div.imdi_details  h2 {
 .imdi_detailtabs .ui-tabs-nav .ui-state-active {
 	 background: transparent no-repeat bottom center; 
 	 border: none;
+}
+
+.imdi_detailtabs .ui-tabs-nav li {
+	width: 30%;
+}
+
+.imdi_detailtabs .ui-tabs-nav li a {
+	 width: 99%;
+	 padding-left: 0.5%;
+	 padding-right: 0.5%;
+	 overflow: hidden;
+	 text-overflow: ellipsis;
+}
+
+.imdi_detailtabs .ui-tabs-nav img {
+	padding-right: 0.3em;
+	box-shadow: none;
+	vertical-align: top;
 }
 
 /* the map in the country tab */

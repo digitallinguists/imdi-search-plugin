@@ -383,7 +383,7 @@ jQuery(document).ready(function($){
 		var History = window.History;
 
 		if (History.enabled) {
-			History.pushState({query: query_value, beginningAt: 0}, null, UpdateQueryString("query", query_string));
+			History.pushState({query: query_value, beginningAt: 0}, null, UpdateQueryString("query", query_value));
 		}
 		else imdiRequest(query_value, 0);
 
