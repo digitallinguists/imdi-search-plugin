@@ -5,8 +5,15 @@
 		{{# languages}}{{trans.languages}}: {{.}}{{/ languages}}
 	</p>
 	<p>{{session_desc}}</p>
+
+
+	{{^ access}}
+	<b>{{trans.accessDeniedText}}</b>
+	{{/ access}}
 	<p>{{trans.getResourceText}} <a href="{{filename}}">{{filename}}</a> ({{format}}{{# size}}, {{.}}{{/ size}})<br />
 	<i>{{trans.downloadInstructions}}</i></p>
-	<iframe src="{{filename}}" width="100%" height="100%" style="border: 1px solid black; border-radius: 5px;" webkitallowfullscreen="true" mozallowfullscreen="true"></iframe>
+	{{# access }}
+		<iframe src="{{filename}}" width="100%" height="100%" style="border: 1px solid black; border-radius: 5px;" webkitallowfullscreen="true" mozallowfullscreen="true"></iframe>
+	{{/ access }}
 </div>
 <p><a href="javascript:history.back()"> {{trans.goBackText}} </a></p>

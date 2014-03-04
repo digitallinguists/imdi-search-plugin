@@ -5,9 +5,14 @@
 		{{# languages}}{{trans.languages}}: {{.}}{{/ languages}}
 	</p>
 	<p>{{session_desc}}</p>
+	{{^ access}}
+	<b>{{trans.accessDeniedText}}</b>
+	{{/ access}}
 	<p>{{trans.getResourceText}} <a href="{{filename}}">{{filename}}</a> ({{format}}{{# size}}, {{.}}{{/ size}})<br />
 	<i>{{trans.downloadInstructions}}</i></p>
+	{{# access }}
 	<img src="{{filename}}" />
+	{{/ access }}
 </div>
 
 <p><a href="javascript:history.back()"> {{trans.goBackText}} </a></p>

@@ -1,3 +1,18 @@
+.entry-content img {
+	box-shadow: none;
+	border-radius: 0;
+}
+
+.ui-widget {
+    font-family: "Open Sans", helvetica, arial, sans-serif;
+    font-size: 1em;
+}
+
+.ui-tabs-nav .ui-state-active {
+	 font-weight: bold;
+
+}
+
 /* ELAN Player
 ------------------------------------------------------------ */
 
@@ -65,6 +80,26 @@
 
 #categories li {
 	margin: 0;
+	clear: both;
+}
+
+#categories .item {
+	max-width: 20em;
+	float: left;
+	overflow: hidden;
+	height: 1.7em;
+	text-overflow: ellipsis;
+	white-space: nowrap
+}
+
+#categories .count {
+	padding-left: 0.5em;
+	display: inline-block;
+	height: 1.7em;
+}
+
+#categories p {
+	margin-bottom: 5px;
 }
 
 /* waiting spinner gif shown while searching */
@@ -135,7 +170,7 @@
 	padding: 1em 8px;
 }
 
-/* icons for resource entries 
+/* icons for resource entries */ 
 img.imdi_resource_icon {
 	width: 2em;
 }
@@ -146,6 +181,15 @@ img.imdi_access_level_image {
 	vertical-align: none;
 }
 
+ul.resources {
+	list-style: none;
+	padding-left: 0;
+}
+
+li.resource {
+	margin-left: 0;
+}
+
 /* Plugin Results Area
 ------------------------------------------------------------ */
 
@@ -154,6 +198,10 @@ div.imdi_session {
 	overflow: auto;
 	clear: both;
 	padding: 1em;
+}
+
+div.imdi_details {
+	padding-right: 52%;
 }
 
 div.imdi_details  h2 {
@@ -211,7 +259,6 @@ div.imdi_details  h2 {
 
 .imdi_detailtabs .ui-tabs-nav img {
 	padding-right: 0.3em;
-	box-shadow: none;
 	vertical-align: top;
 }
 

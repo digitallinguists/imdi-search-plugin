@@ -2,7 +2,7 @@
 	<p><b>{{category}}</b></p>
 	<ul>
 		{{# occurrences}}
-			<li><a href='{{href}}'>{{name}} {{# count}} ({{ . }}) {{/ count}}</a></li>
+			<li><a href='{{href}}' title="{{name}}"><span class="item">{{name}}</span> {{# count}}<span class="count">({{ . }})</span>{{/ count}}</a></li>
 		{{/ occurrences}}
 	</ul>
 </div>

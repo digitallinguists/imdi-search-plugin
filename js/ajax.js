@@ -126,9 +126,14 @@ var advancedsearch =  {group : [
 		]}	
 ]};
 
+
+
 jQuery(document).ready(function($){
 
 	$( ".imdi-category-tabs" ).tabs({ collapsible: true });
+
+//	var style = $("<style>.imdi_detailtabs .ui-tabs-nav .ui-state-active {background-image: url('" + imdi_archive_search_plugin_object.plugin_url + "images/tabarrow.png') }</style>);");
+//	$('html > head').append(style);	
 
 	if (History.enabled) {
 		if (!History.getState().data) {
@@ -162,7 +167,8 @@ jQuery(document).ready(function($){
 	function category_link_onclick(e) {
 		if (History.enabled) {
 			e.preventDefault();
-			var query_string = getUrlVars(e.target.href)['query'];
+			console.log(e);
+			var query_string = getUrlVars(e.target.parentNode.href)['query'];
 			History.pushState({query: query_string, beginningAt: 0}, null, UpdateQueryString("query", query_string));
 		}	
 	}
@@ -199,6 +205,11 @@ jQuery(document).ready(function($){
 		$('<span>').addClass('waiting').css('background-image', "url('" + imdi_archive_search_plugin_object.plugin_url + "images/waiting.gif')").appendTo('#results');
 
 		$('.search-results').empty();
+
+		/* Jump to results */
+		if (!$("#results").isOnScreen())
+			$(document).scrollTop( $("#results").offset().top );  
+
 
 		/** Setup our AJAX request */
 		var opts = {
@@ -253,12 +264,9 @@ jQuery(document).ready(function($){
 					})
 				});
 
- 				jQuery(".imdi_detailtabs .ui-tabs-nav .ui-state-active").css('background-image', "url('" + imdi_archive_search_plugin_object.plugin_url + "images/tabarrow.png')");
-				
 				/** Remove the loading icon and replace the button with default text */
 				$('.waiting').remove();
 				$('#query-api').val(default_text);
-
 			},
 			error: function(xhr, textStatus ,e) {
 				console.log("huhu2");
@@ -729,3 +737,22 @@ function sleep(milliseconds) {
     }
   }
 }
+
+jQuery.fn.isOnScreen = function(){
+    
+    var win = jQuery(window);
+    
+    var viewport = {
+        top : win.scrollTop(),
+        left : win.scrollLeft()
+    };
+    viewport.right = viewport.left + win.width();
+    viewport.bottom = viewport.top + win.height();
+    
+    var bounds = this.offset();
+    bounds.right = bounds.left + this.outerWidth();
+    bounds.bottom = bounds.top + this.outerHeight();
+    
+    return (!(viewport.right < bounds.left || viewport.left > bounds.right || viewport.bottom < bounds.top || viewport.top > bounds.bottom));
+    
+};

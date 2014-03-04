@@ -152,9 +152,9 @@ class IMDI_Search_Plugin {
 		add_shortcode( 'imdi-archive-user-bookmarks', array($this, 'shortcode_userbookmarks'));
 $wp_session = WP_Session::get_instance();
 
-if (!$wp_session['archive_url']) {
+if (!$wp_session['archive_url'] || $wp_session['servlet_url'] == '') {
 	$wp_session['archive_url'] = "http://lac.uni-koeln.de/";
-	$wp_session['servlet_url'] = $wp_session['archive_url'] + "ds/imdi_search/servlet"; 
+	$wp_session['servlet_url'] = $wp_session['archive_url'] . "ds/imdi_search/servlet"; 
 }
 
 
@@ -291,7 +291,8 @@ if (!$wp_session['archive_url']) {
 			'file' => __('File', 'imdi'),
 			'goBackText' => __('Go back to search results', 'imdi'),
 			'downloadInstructions' => __('To download, right click on link and select \'Save as...\''),
-			'getResourceText' => __('Get Resource:', 'imdi')
+			'getResourceText' => __('Get Resource:', 'imdi'),
+			'accessDeniedText' => __('This resource is not publicly accessible.', 'imdi')
 			);
 	
 	
@@ -300,7 +301,6 @@ if (!$wp_session['archive_url']) {
 	    		$languages .= $language->Name;
 	    	}
 	    	if ($languages == ' ') $languages = null;
-
 
 		$standard_params = array(
 					'project' =>  $session_details->Session->MDGroup->Project->Title,
@@ -312,7 +312,8 @@ if (!$wp_session['archive_url']) {
 					'session_title' => $session_details->Session->Title,
 					'size' => ($resource_elem->Size > 0) ? formatSizeUnits($resource_elem->Size) : false,
 					'format' => $resource_elem->Format,
-					'trans' => $translated_text
+					'trans' => $translated_text,
+					'access' => is_accessible(http_build_url($_GET['imdi_url'], array("path"=>(string)$resource_elem->ResourceLink), HTTP_URL_JOIN_PATH))
 				);
 
 		switch ((string)$resource_elem->Format) {
@@ -732,7 +733,7 @@ function parse_occurrences($xml)
 		$occurrences[] = array( "name" => $entry->DisplayName,
 								"count" => $entry->NumberOfOccurrences,
 								"href" => 	"?query=" . 
-								rawurlencode("a:" . $_GET['path'] . "=\"*" . $entry->Value . "*\""));
+								rawurlencode("a:" . $_GET['path'] . "=\"*" . str_replace(array('ó'), '?', $entry->Value) . "*\""));
 	}
 
 	return $occurrences;
@@ -873,7 +874,8 @@ function generate_response_output ($xml) {
 # test accessibility for current user using ArchiveNodeInfo
 function is_accessible($url) {
    	global $_opt_imdi_archive_url;
-	$archive_url = get_option($_opt_imdi_archive_url);
+   	$wp_session = WP_Session::get_instance();
+	$archive_url = $wp_session['archive_url'];
 	$request = xmlrpc_encode_request("LamusAPI.getNodeInfo", array((string)$url));
    	$auth = base64_encode($_POST['user'].":".$_POST['token']);
    	$context = stream_context_create(array('http' => array(
@@ -892,7 +894,7 @@ function is_accessible($url) {
 	else 
 	{
       		$access =  $response["access.rights.read"];
-      		if (($access === 'anyAuthenticatedUser') || ($access === 'everybody'))
+      		if (/*($access === 'anyAuthenticatedUser') ||*/ ($access === 'everybody'))
       		{ return true; }
 		else
       		{
@@ -921,7 +923,8 @@ function get_nodeID($url) {
       'content' => $request
 )));
 
-   	$webservice="http://corpus1.mpi.nl/jkc/lamus/XmlRpcArchiveInfo";
+	$wp_session = WP_Session::get_instance();
+   	$webservice= $wp_session['archive_url'] ."/jkc/lamus/XmlRpcArchiveInfo";
 	$file = file_get_contents($webservice, false, $context);
 	$response = xmlrpc_decode($file);
 	if (xmlrpc_is_fault($response)) 
@@ -934,6 +937,7 @@ function get_nodeID($url) {
       		return $nodeID;
 	}
 }
+
 
 class Match {
 	public $name = '';
@@ -1039,7 +1043,7 @@ function get_resource_icon($type) {
 		case "video/x-mpeg2":
 			$icon = "mpg.png";
 		break;
-		case "video/mp4": $icon = "mp4.png"; break;
+		case "video/mp4": case "audio/mp4": $icon = "mp4.png"; break;
 		case "audio/x-wav": $icon = "wav.png"; break;
 		case "text/x-eaf+xml": $icon = "imdi_eaf.png"; break;
 		case "application/pdf": $icon = "pdf.png"; break;
