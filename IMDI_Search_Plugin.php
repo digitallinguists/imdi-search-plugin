@@ -67,8 +67,6 @@ require 'mustache.php/src/Mustache/Autoloader.php';
 Mustache_Autoloader::register();
 
 $m = NULL;
-
-$wp_session = NULL;
  
 function imdi_the_title( $title, $id ) {
 
@@ -150,13 +148,6 @@ class IMDI_Search_Plugin {
 		add_shortcode( 'imdi-archive-simplesearch', array( $this, 'shortcode_simplesearch'));
 		add_shortcode( 'imdi-archive-resource-page', array($this, 'shortcode_resourcepage'));
 		add_shortcode( 'imdi-archive-user-bookmarks', array($this, 'shortcode_userbookmarks'));
-$wp_session = WP_Session::get_instance();
-
-if (!$wp_session['archive_url'] || $wp_session['servlet_url'] == '') {
-	$wp_session['archive_url'] = "http://lac.uni-koeln.de/";
-	$wp_session['servlet_url'] = $wp_session['archive_url'] . "ds/imdi_search/servlet"; 
-}
-
 
 	}
 	
@@ -416,11 +407,9 @@ if (!$wp_session['archive_url'] || $wp_session['servlet_url'] == '') {
 		global $_opt_imdi_topnode;
 		global $_opt_imdi_max_results;
 
-		$wp_session = WP_Session::get_instance();
-
 
     	$query_topnode = get_option($_opt_imdi_topnode);
-    	$servlet_url = $wp_session['servlet_url']; //get_option($_opt_imdi_servlet_url);
+    	$servlet_url = get_option($_opt_imdi_servlet_url);
 		$max_results = get_option($_opt_imdi_max_results);
 
 		if ( ! isset( $_GET['beginningAt'] ) || isset( $_GET['beginningAt'] ) && empty( $_GET['beginningAt'] ) )
@@ -499,10 +488,9 @@ if (!$wp_session['archive_url'] || $wp_session['servlet_url'] == '') {
 		global $_opt_imdi_servlet_url;
 		global $_opt_imdi_topnode;
 
-		$wp_session = WP_Session::get_instance();
 
 		$query_topnode = get_option($_opt_imdi_topnode);
-    	$servlet_url = $wp_session['servlet_url'];
+    	$servlet_url = get_option($_opt_imdi_servlet_url);
 
     	if ( ! isset( $_GET['path'] ) || isset( $_GET['path'] ) && empty( $_GET['path'] ) )
 			die( __( 'Get ocurrences: no path', 'imdi' ) );
@@ -874,8 +862,7 @@ function generate_response_output ($xml) {
 # test accessibility for current user using ArchiveNodeInfo
 function is_accessible($url) {
    	global $_opt_imdi_archive_url;
-   	$wp_session = WP_Session::get_instance();
-	$archive_url = $wp_session['archive_url'];
+	$archive_url = get_option($_opt_imdi_archive_url);
 	$request = xmlrpc_encode_request("LamusAPI.getNodeInfo", array((string)$url));
    	$auth = base64_encode($_POST['user'].":".$_POST['token']);
    	$context = stream_context_create(array('http' => array(
@@ -915,6 +902,8 @@ function is_accessible($url) {
 
 # get NodeID from URL
 function get_nodeID($url) {
+   $archive_url = get_option($_opt_imdi_archive_url);
+
    $request = xmlrpc_encode_request("LamusAPI.getNodeInfo", array((string)$url));
    $auth = base64_encode($_POST['user'].":".$_POST['token']);
    $context = stream_context_create(array('http' => array(
@@ -923,8 +912,7 @@ function get_nodeID($url) {
       'content' => $request
 )));
 
-	$wp_session = WP_Session::get_instance();
-   	$webservice= $wp_session['archive_url'] ."/jkc/lamus/XmlRpcArchiveInfo";
+   	$webservice= get_option($_opt_imdi_archive_url) ."/jkc/lamus/XmlRpcArchiveInfo";
 	$file = file_get_contents($webservice, false, $context);
 	$response = xmlrpc_decode($file);
 	if (xmlrpc_is_fault($response)) 
