@@ -7,172 +7,172 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2014-03-04 16:44+0100\n"
-"PO-Revision-Date: 2014-03-04 16:45+0100\n"
+"POT-Creation-Date: 2014-03-04 16:45+0100\n"
+"PO-Revision-Date: 2014-03-04 16:58+0100\n"
 "Last-Translator: Marcel\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Language: de_DE\n"
+"Language: es_ES\n"
 "X-Generator: Poedit 1.6.4\n"
 
 #: IMDI_Search_Plugin.php:121 IMDI_Search_Plugin.php:122
 #: IMDI_Search_Plugin.php:173 ../IMDI_Search_Plugin.php:173
 msgid "An unknown error occurred. Please try again!"
-msgstr "Ein unbekannter Fehler ist aufgetreten. Bitte nochmals versuchen."
+msgstr "Lo sentimos, ha ocurrido un error desconocido."
 
 #: IMDI_Search_Plugin.php:123 IMDI_Search_Plugin.php:124
 #: IMDI_Search_Plugin.php:175 ../IMDI_Search_Plugin.php:175
 msgid "Searching the archive..."
-msgstr "Suche im Archiv..."
+msgstr "Buscando en el archivo..."
 
 #: IMDI_Search_Plugin.php:180 IMDI_Search_Plugin.php:181
 #: IMDI_Search_Plugin.php:241 ../IMDI_Search_Plugin.php:241
 msgid "Input"
-msgstr "Suche"
+msgstr "Término de búsqueda"
 
 #: IMDI_Search_Plugin.php:182 IMDI_Search_Plugin.php:183
 #: IMDI_Search_Plugin.php:243 ../IMDI_Search_Plugin.php:243
 msgid "Search the Archive"
-msgstr "Das Archiv durchsuchen"
+msgstr "Buscar en el archivo"
 
 #: IMDI_Search_Plugin.php:183 IMDI_Search_Plugin.php:184
 #: IMDI_Search_Plugin.php:244 ../IMDI_Search_Plugin.php:244
 msgid "Results"
-msgstr "Gefundene Sitzungen"
+msgstr "Resultados"
 
 #: IMDI_Search_Plugin.php:342 IMDI_Search_Plugin.php:361
 #: IMDI_Search_Plugin.php:433 ../IMDI_Search_Plugin.php:433
 msgid "No search term was entered..."
-msgstr "Kein Suchbegriff eingegeben..."
+msgstr "No se ha introducido ningún termino de búsqueda"
 
 #: IMDI_Search_Plugin.php:383 IMDI_Search_Plugin.php:402
 #: IMDI_Search_Plugin.php:476 ../IMDI_Search_Plugin.php:476
 msgid "No results"
-msgstr "Keine Ergebnisse"
+msgstr "No hay ningún resultados."
 
 #: IMDI_Search_Plugin.php:410 IMDI_Search_Plugin.php:429
 #: IMDI_Search_Plugin.php:508 ../IMDI_Search_Plugin.php:508
 msgid "Get ocurrences: no path"
-msgstr "Get occurrences: no path (Kategorien falsch konfiguriert)"
+msgstr "Get ocurrences: no path. Error en la configuración de categorías."
 
 #: IMDI_Search_Plugin.php:971 IMDI_Search_Plugin.php:990
 #: IMDI_Search_Plugin.php:1013 ../IMDI_Search_Plugin.php:1013
 msgid "Access level 1: openly accessible"
-msgstr "Access level 1: frei verfügbar"
+msgstr "Nivel de acceso 1: acceso abierto"
 
 #: IMDI_Search_Plugin.php:974 IMDI_Search_Plugin.php:993
 #: IMDI_Search_Plugin.php:1017 ../IMDI_Search_Plugin.php:1017
 msgid "Access level 2: accessible to registered users"
-msgstr "Access level 2: verfügbar für registrierte Benutzer"
+msgstr "Nivel de acceso 2: acceso limitado para usuarios registrados"
 
 #: IMDI_Search_Plugin.php:977 IMDI_Search_Plugin.php:996
 #: IMDI_Search_Plugin.php:1021 ../IMDI_Search_Plugin.php:1021
 msgid "Access level 3: access can be requested"
-msgstr "Access level 3: Zugriff muss angefordert werden"
+msgstr "Nivel de acceso 3: el acceso puede ser solicitado"
 
 #: IMDI_Search_Plugin.php:980 IMDI_Search_Plugin.php:999
 #: IMDI_Search_Plugin.php:1025 ../IMDI_Search_Plugin.php:1025
 msgid "Access level 4: not accessible"
-msgstr "Access level 4: nicht verfügbar"
+msgstr "Nivel de acceso 4: no puede ser accedido"
 
 #: IMDI_Search_Plugin.php:182 IMDI_Search_Plugin.php:242
 #: ../IMDI_Search_Plugin.php:242
 msgid "Type your search term here"
-msgstr "Hier Suchbegriff eingeben"
+msgstr "Introduzca un término de búsqeda"
 
 #: IMDI_Search_Plugin.php:185 IMDI_Search_Plugin.php:245
 #: ../IMDI_Search_Plugin.php:245
 msgid "Categories"
-msgstr "Kategorien"
+msgstr "Categorías"
 
 #: IMDI_Search_Plugin.php:186 IMDI_Search_Plugin.php:246
 #: ../IMDI_Search_Plugin.php:246
 msgid "Fulltext search"
-msgstr "Volltextsuche"
+msgstr "Búsqueda simple"
 
 #: IMDI_Search_Plugin.php:187 IMDI_Search_Plugin.php:247
 #: ../IMDI_Search_Plugin.php:247
 msgid "Advanced search"
-msgstr "Erweiterte Suche"
+msgstr "Búsqueda avanzado"
 
 #: IMDI_Search_Plugin.php:209 IMDI_Search_Plugin.php:270
 #: ../IMDI_Search_Plugin.php:270
 msgid "search"
-msgstr "suche"
+msgstr "buscar"
 
 #: IMDI_Search_Plugin.php:222 IMDI_Search_Plugin.php:288
 #: ../IMDI_Search_Plugin.php:288
 msgid "Project"
-msgstr "Projekt"
+msgstr "Proyecto"
 
 #: IMDI_Search_Plugin.php:223 IMDI_Search_Plugin.php:289
 #: ../IMDI_Search_Plugin.php:289
 msgid "Country"
-msgstr "Land"
+msgstr "País"
 
 #: IMDI_Search_Plugin.php:224 IMDI_Search_Plugin.php:290
 #: ../IMDI_Search_Plugin.php:290
 msgid "Languages"
-msgstr "Sprachen"
+msgstr "Idiomas"
 
 #: IMDI_Search_Plugin.php:225 IMDI_Search_Plugin.php:291
 #: ../IMDI_Search_Plugin.php:291
 msgid "File"
-msgstr "Datei"
+msgstr "Archivo"
 
 #: IMDI_Search_Plugin.php:226 IMDI_Search_Plugin.php:292
 #: ../IMDI_Search_Plugin.php:292
 msgid "Go back to search results"
-msgstr "Zurück zu den Suchergebnissen"
+msgstr "Volver a los resultados de búsqueda"
 
 #: IMDI_Search_Plugin.php:308
 msgid "No media type specified in shortcode"
-msgstr "Kein Medientyp im Shortcode angegeben"
+msgstr ""
 
 #: IMDI_Search_Plugin.php:248 ../IMDI_Search_Plugin.php:248
 msgid "Only show results with freely accessible resources"
-msgstr "Nur Ergebnisse mit frei verfügbaren Ressourcen anzeigen"
+msgstr ""
 
 #: IMDI_Search_Plugin.php:293 ../IMDI_Search_Plugin.php:293
 msgid "To download, right click on link and select 'Save as...'"
 msgstr ""
-"Zum Herunterladen der Ressource Rechtsklick auf den Link und \"Speichern "
-"unter...\" auswählen."
+"Para descargar, haga click derecho sobre el enlace y selecciona \"Guardar "
+"como...\""
 
 #: IMDI_Search_Plugin.php:294 ../IMDI_Search_Plugin.php:294
 msgid "Get Resource:"
-msgstr "Ressource herunterladen:"
+msgstr "Descargar el recurso:"
 
 #: IMDI_Search_Plugin.php:295 ../IMDI_Search_Plugin.php:295
 msgid "This resource is not publicly accessible."
-msgstr "Diese Ressource ist nicht öffentlich."
+msgstr "Este recurso no puede ser accedido por el público"
 
 #: IMDI_Search_Plugin.php:360 ../IMDI_Search_Plugin.php:360
 msgid "Play"
-msgstr "Play"
+msgstr "Reproducir"
 
 #: IMDI_Search_Plugin.php:361 ../IMDI_Search_Plugin.php:361
 msgid "Pause"
-msgstr "Pause"
+msgstr "Pausa"
 
 #: IMDI_Search_Plugin.php:377 ../IMDI_Search_Plugin.php:377
 msgid "Unknown media type"
-msgstr "Unbekannter Medientyp"
-
-#: ../../../themes/twentytwelve/header.php:72
-msgid "Browsing archive: "
-msgstr "Gewähltes Archiv:"
+msgstr "Típo de medio desconocido."
 
 #: ../../../themes/twentytwelve/header.php:67
 msgid "select archive"
-msgstr "Archiv wechseln"
+msgstr "seleccionar archivo"
+
+#: ../../../themes/twentytwelve/header.php:72
+msgid "Browsing archive: "
+msgstr "Explorando el archivo: "
 
 #: ../../../themes/twentytwelve/header.php:76
 msgid "Menu"
-msgstr "Menü"
+msgstr "Menu"
 
 #: ../../../themes/twentytwelve/header.php:77
 msgid "Skip to content"
-msgstr "Zum Inhalt"
+msgstr "Al contenido"
