@@ -1,0 +1,133 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2014-03-04 15:31+0100\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=CHARSET\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: IMDI_Search_Plugin.php:173
+msgid "An unknown error occurred. Please try again!"
+msgstr ""
+
+#: IMDI_Search_Plugin.php:175
+msgid "Searching the archive..."
+msgstr ""
+
+#: IMDI_Search_Plugin.php:241
+msgid "Input"
+msgstr ""
+
+#: IMDI_Search_Plugin.php:242
+msgid "Type your search term here"
+msgstr ""
+
+#: IMDI_Search_Plugin.php:243
+msgid "Search the Archive"
+msgstr ""
+
+#: IMDI_Search_Plugin.php:244
+msgid "Results"
+msgstr ""
+
+#: IMDI_Search_Plugin.php:245
+msgid "Categories"
+msgstr ""
+
+#: IMDI_Search_Plugin.php:246
+msgid "Fulltext search"
+msgstr ""
+
+#: IMDI_Search_Plugin.php:247
+msgid "Advanced search"
+msgstr ""
+
+#: IMDI_Search_Plugin.php:248
+msgid "Only show results with freely accessible resources"
+msgstr ""
+
+#: IMDI_Search_Plugin.php:270
+msgid "search"
+msgstr ""
+
+#: IMDI_Search_Plugin.php:288
+msgid "Project"
+msgstr ""
+
+#: IMDI_Search_Plugin.php:289
+msgid "Country"
+msgstr ""
+
+#: IMDI_Search_Plugin.php:290
+msgid "Languages"
+msgstr ""
+
+#: IMDI_Search_Plugin.php:291
+msgid "File"
+msgstr ""
+
+#: IMDI_Search_Plugin.php:292
+msgid "Go back to search results"
+msgstr ""
+
+#: IMDI_Search_Plugin.php:293
+msgid "To download, right click on link and select 'Save as...'"
+msgstr ""
+
+#: IMDI_Search_Plugin.php:294
+msgid "Get Resource:"
+msgstr ""
+
+#: IMDI_Search_Plugin.php:295
+msgid "This resource is not publicly accessible."
+msgstr ""
+
+#: IMDI_Search_Plugin.php:360
+msgid "Play"
+msgstr ""
+
+#: IMDI_Search_Plugin.php:361
+msgid "Pause"
+msgstr ""
+
+#: IMDI_Search_Plugin.php:377
+msgid "Unknown media type"
+msgstr ""
+
+#: IMDI_Search_Plugin.php:433
+msgid "No search term was entered..."
+msgstr ""
+
+#: IMDI_Search_Plugin.php:476
+msgid "No results"
+msgstr ""
+
+#: IMDI_Search_Plugin.php:508
+msgid "Get ocurrences: no path"
+msgstr ""
+
+#: IMDI_Search_Plugin.php:1013
+msgid "Access level 1: openly accessible"
+msgstr ""
+
+#: IMDI_Search_Plugin.php:1017
+msgid "Access level 2: accessible to registered users"
+msgstr ""
+
+#: IMDI_Search_Plugin.php:1021
+msgid "Access level 3: access can be requested"
+msgstr ""
+
+#: IMDI_Search_Plugin.php:1025
+msgid "Access level 4: not accessible"
+msgstr ""

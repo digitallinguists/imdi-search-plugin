@@ -290,7 +290,7 @@ if (!$wp_session['archive_url'] || $wp_session['servlet_url'] == '') {
 			'languages' => __('Languages', 'imdi'),
 			'file' => __('File', 'imdi'),
 			'goBackText' => __('Go back to search results', 'imdi'),
-			'downloadInstructions' => __('To download, right click on link and select \'Save as...\''),
+			'downloadInstructions' => __('To download, right click on link and select \'Save as...\'', 'imdi'),
 			'getResourceText' => __('Get Resource:', 'imdi'),
 			'accessDeniedText' => __('This resource is not publicly accessible.', 'imdi')
 			);
