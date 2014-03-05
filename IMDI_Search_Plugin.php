@@ -264,8 +264,8 @@ if (!$wp_session['archive_url'] || $wp_session['servlet_url'] == '') {
 		));
 
 		/** Enqueue our scripts and styles */
-		wp_enqueue_script( 'imdi-archive-search-plugin' );
-		wp_enqueue_style( 'imdi-archive-search-plugin' );
+		//wp_enqueue_script( 'imdi-archive-search-plugin' );
+		//wp_enqueue_style( 'imdi-archive-search-plugin' );
 
 		return $m->render('simplesearch', array('searchButtonText' => __("search", "imdi")));
 	}
