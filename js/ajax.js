@@ -132,44 +132,89 @@ jQuery(document).ready(function($){
 
 	$( ".imdi-category-tabs" ).tabs({ collapsible: true });
 
-//	var style = $("<style>.imdi_detailtabs .ui-tabs-nav .ui-state-active {background-image: url('" + imdi_archive_search_plugin_object.plugin_url + "images/tabarrow.png') }</style>);");
-//	$('html > head').append(style);	
-
 	if (History.enabled) {
-		if (!History.getState().data) {
-			if (_GET['query']) {
-				History.replaceState({query: _GET['query']});
+		if ($.isEmptyObject(History.getState().data)) {
+			if (_GET && _GET['query']) {
+				History.replaceState(_GET);
 			}
 		}
 	}
 
-	if (!History.enabled) prefill_values(_GET);
+	if(_GET && _GET['query']) {
+		
+		// if request is not an advanced request and not a category, put the query into the keyword search textfield
+		// if ((decodeURIComponent(_GET['query']).substr(0, 2) != "a:") && (typeof _GET['cat'] != 'string'))
+		//	$('#imdi-query-value').val(_GET['query']);
+		
+		prefill_values(_GET);
 
+		imdiRequest(getUrlVars(document.URL));
+	}
+
+	for (var i in imdi_archive_search_plugin_object.categories) {
+		console.log(imdi_archive_search_plugin_object.categories[i]);
+
+		var dummyDiv = jQuery("<div>", {id: "cat_" + i});
+
+		jQuery("#categories").append(dummyDiv);
+
+		if (imdi_archive_search_plugin_object.categories[i]['type'] == "occurrences")
+			occurrencesRequest(dummyDiv, imdi_archive_search_plugin_object.categories[i]['path'], imdi_archive_search_plugin_object.categories[i]['name'], "category");
+		else if (imdi_archive_search_plugin_object.categories[i]['type'] == "predefined")
+			outputPredefinedCategoryRequest(dummyDiv, imdi_archive_search_plugin_object.categories[i]['items'], imdi_archive_search_plugin_object.categories[i]['name']);
+
+
+	}
 
 	$(window).bind('statechange',function(){ 
-		console.log("THE STATE");
-		//console.log(History.getState());
 
-		console.log("popp");
+
 		if (History.getState().data) {
 			//if (!(History.getState().data['new_request'] == true)) prefill_values(History.getState().data);
 
 			if (History.getState().data.query) {
-				var query_value = decodeURIComponent(History.getState().data.query);
-				var beginningAt = History.getState().data.beginningAt ? History.getState().data.beginningAt : 0;
 				prefill_values(History.getState().data);
-				imdiRequest(query_value, beginningAt);
-			}
-		} 
+				imdiRequest(History.getState().data);
+			} 
+		}  
 		
 	 });
+
+	// add the first advanced search constraint row (if the area is still empty)
+	if ($("#imdi-advanced-search").children().length == 0)	
+		advancedSearchAddConstraintRow(jQuery("#imdi-advanced-search"), true);			
+
+
+	// emphasize the active category
+	function markCategory(cat) 
+	{
+
+		if ($("#categories .imdi-active-category").length > 0) {
+			$($("#categories .imdi-active-category")[0]).removeClass("imdi-active-category");
+		}
+
+		$("#categories .item").each(function(){
+			var itemName = $(this).text();
+			var catName = $($(this).parents('div')[0]).attr('id');
+
+
+			if (decodeURIComponent(cat) == (catName + "~~" + itemName))  
+				$(this).addClass("imdi-active-category");
+		});
+	}
+	
+
+	if(_GET && _GET['cat'] && _GET['cat'].length > 0) {
+		markCategory(_GET['cat']);
+	}
 
 	function category_link_onclick(e) {
 		if (History.enabled) {
 			e.preventDefault();
 			console.log(e);
 			var query_string = getUrlVars(e.target.parentNode.href)['query'];
-			History.pushState({query: query_string, beginningAt: 0}, null, UpdateQueryString("query", query_string));
+			markCategory(getUrlVars(e.target.parentNode.href)['cat']);
+			History.pushState({query: query_string, beginningAt: 0, cat: getUrlVars(e.target.parentNode.href)['cat']}, null, UpdateQueryString("query", query_string, UpdateQueryString("constraints", "", UpdateQueryString("cat", getUrlVars(e.target.parentNode.href)['cat']))));
 		}	
 	}
 
@@ -178,37 +223,37 @@ jQuery(document).ready(function($){
 			e.preventDefault();
 			var query_string = getUrlVars(e.target.href)['query'];
 			var beginningAt = getUrlVars(e.target.href)['beginningAt'];
-			History.pushState({query: query_string, beginningAt: beginningAt}, null, UpdateQueryString("query", query_string, UpdateQueryString("beginningAt", beginningAt)));
+			var cat = getUrlVars(e.target.href)['cat'];
+			var state = {query: query_string, beginningAt: beginningAt, cat: cat};
+			alert(JSON.stringify(state) + " / " + e.target.href);
+			History.pushState(state, null, UpdateQueryString("query", query_string, UpdateQueryString("beginningAt", beginningAt)));
 		}	
 	}
 
 	$('#categories a').click(category_link_onclick);
-
-	// $('#results-area').on("click", "div#toggle-save", function(){
-	// 				alert("save");
-	// 				toggleSaveRequest(this, $(this).children('#imdi_session_url').attr('value'));
-	// });
 
 
 	/**
 	 * Perform the AJAX request when the user clicks the search button.
 	 */
 
-	 function imdiRequest(query_value, beginningAt) {
+	 function imdiRequest(params) {
 
 		/** Output a message and loading icon */
-
 		var default_text = $('#query-api').val();
 		$('#query-api').val(imdi_archive_search_plugin_object.searching);
-		//$('#query-api').prop('disabled', true);
-		//$('#results').after(jQuery('<span class="waiting"></span>').css('background-image', "url('" + imdi_archive_search_plugin_object.plugin_url + "images/downarrow.png')");
-		$('<span>').addClass('waiting').css('background-image', "url('" + imdi_archive_search_plugin_object.plugin_url + "images/waiting.gif')").appendTo('#results');
+		$('div#results-area').show();
 
-		$('.search-results').empty();
+		// Clear results area and show busy spinner
+		$('#results-area').empty();
+		$('<span>').addClass('waiting').css('background-image', "url('" + imdi_archive_search_plugin_object.plugin_url + "images/waiting.gif')").appendTo('#results-area');
+
 
 		/* Jump to results */
-		if (!$("#results").isOnScreen())
-			$(document).scrollTop( $("#results").offset().top );  
+
+		if (!$("span.waiting").isOnScreen())
+			$(document).scrollTop( $("span.waiting").offset().top );  
+
 
 
 		/** Setup our AJAX request */
@@ -221,17 +266,19 @@ jQuery(document).ready(function($){
 			data: {
 				action: 'search_IMDI_archive',
 				nonce: imdi_archive_search_plugin_object.nonce,
-				query: query_value,
-				beginningAt:  (_GET && _GET['beginningAt']) ? _GET['beginningAt'] : beginningAt
+				query: params['query'],
+				beginningAt:  params['beginningAt'] ? params['beginningAt'] : 0,
+				cat: params['cat'] ? params['cat'] : "",
+				constraints: params['constraints'] ? params['constraints'] : ""
 			},
 			success: function(response){
 
 
 				/** Make sure to remove any previous error messages or data if we have any and append our data */
 
-				$('.search-results').append(response.html);
+				$('#results-area').append(response.html);
 
-				$('#pageIndex a').click(page_link_onclick);
+				$('#imdi-pageindex a').click(page_link_onclick);
 
 
 				jQuery(".imdi_detailtabs").each(function(){jQuery(this).tabs(
@@ -269,10 +316,6 @@ jQuery(document).ready(function($){
 				$('#query-api').val(default_text);
 			},
 			error: function(xhr, textStatus ,e) {
-				console.log("huhu2");
-				console.log(e);
-				console.log(xhr);
-				console.log(textStatus);
 				/** Make sure to remove any previous error messages or data if we have any */
 				$('.search-results').empty();
 				
@@ -294,8 +337,6 @@ jQuery(document).ready(function($){
 
 	 function occurrencesRequest(dummyDiv, path, name) {
 		
-		console.log("Send occurrencesRequest:" + path + " | " + name);
-
 		/** Setup our AJAX request */
 		var opts = {
 			url: imdi_archive_search_plugin_object.url,
@@ -311,8 +352,6 @@ jQuery(document).ready(function($){
 				responseType: "category"
 			},
 			success: function(html) {
-				console.log("got category");
-				console.log(html);
 				append_category(html, dummyDiv)
 			},
 			error: category_error
@@ -333,8 +372,6 @@ jQuery(document).ready(function($){
 	 }
 
 	 function outputPredefinedCategoryRequest(dummyDiv, items, name) {
-
-	 			console.log("Send outputPredefinedCategoryRequest:" + items + " | " + name);
 
 	 		var opts = {
 			url: imdi_archive_search_plugin_object.url,
@@ -391,9 +428,9 @@ jQuery(document).ready(function($){
 		var History = window.History;
 
 		if (History.enabled) {
-			History.pushState({query: query_value, beginningAt: 0}, null, UpdateQueryString("query", query_value));
+			History.pushState({query: query_value, beginningAt: 0}, null, UpdateQueryString("query", query_value, UpdateQueryString("constraints", "", UpdateQueryString("cat", "", UpdateQueryString("beginningAt", "0")))));
 		}
-		else imdiRequest(query_value, 0);
+		else imdiRequest({query: query_value});
 
 	});
 	$('body').on('click.searchIMDIarchive', '#query-api-advanced', function(e){
@@ -423,33 +460,13 @@ jQuery(document).ready(function($){
 		var History = window.History;
 
 		if (History.enabled) {
-			History.pushState({query: query_value, constraints: constraints, beginningAt: 0}, null, UpdateQueryString("query", query_value, UpdateQueryString("constraints",  encodeURIComponent(JSON.stringify(constraints)))));
+			History.pushState({query: query_value, constraints: constraints, beginningAt: 0}, null, UpdateQueryString("query", query_value, UpdateQueryString("constraints",  encodeURIComponent(JSON.stringify(constraints), UpdateQueryString("cat", "", UpdateQueryString("beginningAt", "0"))))));
 		}
-		else imdiRequest(query_value, 0);
+		else imdiRequest({query: query_value});
 
-		console.log(advancedSearchBuildQuery());
 	});
 
-	if(_GET && _GET['query']) {
-		$('#imdi-query-value').val(_GET['query']);
-		imdiRequest(_GET['query'], 0);
-	}
 
-	for (var i in imdi_archive_search_plugin_object.categories) {
-		console.log(imdi_archive_search_plugin_object.categories[i]);
-
-		var dummyDiv = jQuery("<div>", {id: "cat_" + i});
-
-		jQuery("#categories").append(dummyDiv);
-
-		if (imdi_archive_search_plugin_object.categories[i]['type'] == "occurrences")
-			occurrencesRequest(dummyDiv, imdi_archive_search_plugin_object.categories[i]['path'], imdi_archive_search_plugin_object.categories[i]['name'], "category");
-		else if (imdi_archive_search_plugin_object.categories[i]['type'] == "predefined")
-			outputPredefinedCategoryRequest(dummyDiv, imdi_archive_search_plugin_object.categories[i]['items'], imdi_archive_search_plugin_object.categories[i]['name']);
-
-		//sleep(1000);
-
-	}
 
 	function advancedSearchGetIndex(groupSelect) {
 		var indexArray = Array()
@@ -508,7 +525,9 @@ jQuery(document).ready(function($){
 			if (item.autocomplete.type == "predefined") {
 				jQuery(inputField).autocomplete({source: item.autocomplete.items});
 			} else if (item.autocomplete.type == "occurrences") {
-				$(inputField).addClass('ui-autocomplete-loading');
+				$(inputField).css('background-image', "url('" + imdi_archive_search_plugin_object.plugin_url + "images/waiting.gif')");
+				$(inputField).css('background-position', "98% 50%");
+				$(inputField).css('background-repeat', "no-repeat");
 				$.ajax({ 
 					url: imdi_archive_search_plugin_object.url,
 							type: 'GET',
@@ -528,9 +547,8 @@ jQuery(document).ready(function($){
 							source: json,
 							minLength: 0
 						});
-						$(inputField).removeClass('ui-autocomplete-loading');
 						$(inputField).css('background-image', "url('" + imdi_archive_search_plugin_object.plugin_url + "images/downarrow.png')");
-						$(inputField).css('background-position', "right center");
+						$(inputField).css('background-position', "98% 50%");
 						$(inputField).css('background-repeat', "no-repeat");
 
 						$(inputField).bind('click', function(){ $(this).autocomplete("search"); console.log("sörch") } );
@@ -538,7 +556,7 @@ jQuery(document).ready(function($){
 					error: function(json) {
 						console.log("autocomplete occurrences error");
 						console.log(json);
-						$(inputField).removeClass('ui-autocomplete-loading');						
+						$(inputField).css('background-image', "none");						
 					}
 				});			
 			}
@@ -617,7 +635,6 @@ jQuery(document).ready(function($){
 	function prefill_values(data) {
 
 		jQuery("#imdi-advanced-search").empty();
-		console.log(data['constraints']);
 		if (data['constraints']) {
 				$( ".imdi-category-tabs" ).tabs( "option", "active", 2 ); 
 				var constraints = data['constraints'];
@@ -626,10 +643,9 @@ jQuery(document).ready(function($){
 				for (var i in constraints) {
 					var constraintsRow = advancedSearchAddConstraintRow(jQuery("#imdi-advanced-search"), (i==0));
 					for (var j in constraints[i]['index']) {
-						console.log("option[value=\""+ constraints[i]['index'][j] + "\"]");
-						var lastGroupSelect = jQuery(constraintsRow).children("select.group").last();
-						jQuery(lastGroupSelect).children("option[value=\""+ constraints[i]['index'][j] + "\"]").attr("selected", true);
-						jQuery(lastGroupSelect).trigger("change");
+						var currentGroupSelect = jQuery(constraintsRow).children("select.group")[j];
+						jQuery(currentGroupSelect).children("option[value=\""+ constraints[i]['index'][j] + "\"]").attr("selected", true);
+						jQuery(currentGroupSelect).trigger("change");
 					}
 					jQuery(constraintsRow).children("select#operators").val(constraints[i]['operator']);
 				}
@@ -638,7 +654,6 @@ jQuery(document).ready(function($){
 					for (var i in queryArray) {
 						var constraintArray = queryArray[i].replace(/\{=|[{}"<>]/g, '').split(" = ");
 						jQuery("input#constraint[name=\"" + constraintArray[0] + "\"]").val(constraintArray[1]);
-						console.log( constraintArray[0] +  " soll sein: " + constraintArray[1]);
 					}
 				}
 			} else {
@@ -646,16 +661,17 @@ jQuery(document).ready(function($){
 		// this is not an advanced search because we have no constraints parameter
 		// if first two letter of query string is "a:" then it is a cagegoty
 		// else a simple search
-		if (data['query']) {
-			if (decodeURIComponent(data['query']).substr(0, 2) == "a:") {
+		
+		if (data['cat']) {
 				$( ".imdi-category-tabs" ).tabs( "option", "active", 0);
 			}
-		else 
+		else if (data['query']){
 			$( ".imdi-category-tabs" ).tabs( "option", "active", 1);
 			$( "input#imdi-query-value" ).val(data['query']);
 		}
 	}
 	}
+
 
 
 	
@@ -740,19 +756,12 @@ function sleep(milliseconds) {
 
 jQuery.fn.isOnScreen = function(){
     
-    var win = jQuery(window);
-    
-    var viewport = {
-        top : win.scrollTop(),
-        left : win.scrollLeft()
-    };
-    viewport.right = viewport.left + win.width();
-    viewport.bottom = viewport.top + win.height();
-    
-    var bounds = this.offset();
-    bounds.right = bounds.left + this.outerWidth();
-    bounds.bottom = bounds.top + this.outerHeight();
-    
-    return (!(viewport.right < bounds.left || viewport.left > bounds.right || viewport.bottom < bounds.top || viewport.top > bounds.bottom));
-    
+    var docViewTop = jQuery(window).scrollTop();
+    var docViewBottom = docViewTop + jQuery(window).height();
+
+    var elemTop = jQuery(this).offset().top;
+    var elemBottom = elemTop + jQuery(this).height();
+
+    return ((elemBottom <= docViewBottom) && (elemTop >= docViewTop));
+
 };

@@ -79,7 +79,6 @@ function imdi_the_title( $title, $id ) {
 function imdi_wp_title( $title, $sep) {
 	if (is_page('imdi-resource'))
 		return $_GET['title'];
-	else return $title;
 }
 add_filter( 'wp_title', 'imdi_wp_title', 10, 2 );
 add_filter( 'the_title', 'imdi_the_title', 10, 2 );
@@ -231,10 +230,11 @@ class IMDI_Search_Plugin {
 		));
 
 		$output =  $m->render('imdi_query', array('inputTitle' => __('Input', 'imdi'),
-													'placeholderText' => __( 'Enter search term here', 'imdi' ),
+													'placeholderText' => __( 'Type your search term here', 'imdi' ),
 													'submitButtonText' => __( 'Search the Archive', 'imdi' ),
+													'resultsTitle' => __("Results", "imdi"),
 													'categoriesTabTitle' => __("Categories", "imdi"),
-													'fulltextSearchTabTitle' => __("Keyword search", "imdi"),
+													'fulltextSearchTabTitle' => __("Fulltext search", "imdi"),
 													'advancedSearchTabTitle' => __("Advanced search", "imdi"),
 													'onlyWithRessourcesText' => __("Only show results with freely accessible resources")
 													));
@@ -248,20 +248,17 @@ class IMDI_Search_Plugin {
 	
 	}
 
-	public function shortcode_simplesearch($atts) {
+	public function shortcode_simplesearch() {
 
 			$m = new Mustache_Engine(array(
     		'loader' => new Mustache_Loader_FilesystemLoader(dirname(__FILE__) . '/templates', array('extension' => '.html')),
 		));
 
 		/** Enqueue our scripts and styles */
-		//wp_enqueue_script( 'imdi-archive-search-plugin' );
-		//wp_enqueue_style( 'imdi-archive-search-plugin' );
+		wp_enqueue_script( 'imdi-archive-search-plugin' );
+		wp_enqueue_style( 'imdi-archive-search-plugin' );
 
-		return $m->render('simplesearch', array(
-			'searchButtonText' => $atts['button'],
-			'placeholderText' => $atts['placeholder'])
-		);
+		return $m->render('simplesearch', array('searchButtonText' => __("search", "imdi")));
 	}
 
 	public function shortcode_resourcepage($atts) {
@@ -431,13 +428,11 @@ class IMDI_Search_Plugin {
 		/** Args we want to send to the plugin API (the request must be an object) */	
 		$query_term = (stripslashes( $_GET['query']));
 
-
 		$query_type = "simple";
 
-		if (substr($query_term, 0, 4) == "a%3A") {
+		if (substr($query_term, 0, 2) == "a:") {
 		   $query_type = "advanced";
-		   $query_term = str_replace("%5C%5Cn", "%0A", substr($query_term, 4));
-
+		   $query_term = str_replace("\\\\n", "\n", substr($query_term, 2));
 		   //echo $query_term;
 		}
 			
@@ -445,7 +440,7 @@ class IMDI_Search_Plugin {
 			'?action=getMatches&first=' . $beginningAt . '&last='
 			. strval(intval($beginningAt) + ($max_results - 1)) . 
 			'&query=' 
-			. $query_term . 
+			. rawurlencode($query_term) . 
 			'&type='.$query_type.'&nodeid=MPI'
 			. $query_topnode .  
 			'%23&returnType=xml&includeUrl=true&includeTitle=true&includeResources=true';
@@ -466,8 +461,7 @@ class IMDI_Search_Plugin {
 			
 		/** Bail out early if there are any errors */
 		if ( 200 != $response_code || is_wp_error( $response_xml ) || is_null( $response_xml ) ) {
-			//echo $response_xml;
-			//echo $response_body;
+			echo $response_xml;
 			die( __( 'No results', 'imdi' ) );
 		}
 				
@@ -611,13 +605,9 @@ function ajax_toggle_save_session() {
 
 	global $m;
 
-		foreach ($items as & $item) {
-			$item['href'] =  $item['href'].'&cat='.rawurlencode($title . "~~" . $item['name']);
-		}
-
 	return $m->render('category',
 			array(
-				"category" =>  qtrans_useCurrentLanguageIfNotFoundUseDefaultLanguage($title),
+				"category" =>  $title,
 				"occurrences" => $items
 	));
 }
@@ -639,7 +629,6 @@ function ajax_toggle_save_session() {
 	function output_session($session_url, $match, $session_details) {
 
 			global $m;
-			global $_opt_imdi_archive_url;
 
       
 	    	$a = array();
@@ -693,8 +682,6 @@ function ajax_toggle_save_session() {
 
 	    	//$output .= "<br />hallo" . htmlentities(var_dump($session_details->Session->Resources->children())) . "<br />";
 
-	    	$a['imdi-browser-link'] = get_option($_opt_imdi_archive_url) . "/ds/imdi_browser/?openhandle=".$session_details['ArchiveHandle'];
-
 
 	    	if ($match != null) $resources = $match->resources;
 	    	else $resources = $session_details->Session->Resources->children();
@@ -707,9 +694,7 @@ function ajax_toggle_save_session() {
             	 $a['resources'][] = imdi_handle_resource($res,$session_url, $res_page_title);
 	        }
 
-	       $a['trans'] = array(
-	       		"openInIMDIBrowser" => __("Open in IMDI Browser", 'imdi')
-	       	);
+	       
 
 	    	$output .= $m->render('session_details', $a);
 	    	return $output;	
@@ -819,8 +804,7 @@ function generate_response_output ($xml) {
 		for ($i = 0; $i <= $number_of_pages; $i++) {
 			$pages[] = array(
 				"page_number" => $i + 1,
-				"page_link" => "?query=" . rawurlencode(stripslashes($_GET['query'])) . "&beginningAt=" . $i  * $max_results,
-				"active_page_class" => (floor($_GET['beginningAt'] / $max_results) == $i) ? "imdi-active-page" : ""
+				"page_link" => "?query=" . rawurlencode(stripslashes($_GET['query'])) . "&beginningAt=" . $i  * $max_results
 			);
 		}
 
@@ -847,7 +831,9 @@ function generate_response_output ($xml) {
 
 	function output_matches($matches, $no_of_results) {
 
-		$pages = generate_pagelist($no_of_results);
+		$output = '';
+
+		$output .= generate_pagelist($no_of_results);
 
 		$results = array();
 		//$filter = array();
@@ -864,12 +850,11 @@ function generate_response_output ($xml) {
  			//$filter = filter_parse($filter, $session_details);     	
   		}
 
-  		$output = $m->render('results', array(
-  			"results" => $results,
-  			"number" => "wurst",
-  			"pagelist" => $pages,
-  			'resultsTitle' => sprintf(__("%s sessions found.", "imdi"), $no_of_results) /*,
+  		$output .= $m->render('results', array(
+  			"results" => $results/*,
   			"filter" => $filter*/));
+
+  		$output .= generate_pagelist($no_of_results);
 
   		return $output;
 }
@@ -892,7 +877,6 @@ function is_accessible($url) {
 	if (xmlrpc_is_fault($response)) 
 	{
       		echo "xmlrpc: $response[faultString] ($response[faultCode])";
-      		echo $url;
    	} 
 	else 
 	{
@@ -1062,11 +1046,6 @@ function get_session_details($url)
 {
 	$body = http_parse_message(http_get($url))->body;
     $xml = simplexml_load_string($body);
- 
- 	if (!$xml) {
- 		echo "DETAILS FAILED ".$url;
- 	}
-
     $xml->RegisterXPathNamespace("a", "http://www.mpi.nl/IMDI/Schema/IMDI");
     return $xml;
 

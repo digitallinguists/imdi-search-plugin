@@ -13,6 +13,10 @@
 
 }
 
+code {
+	margin-bottom: 1em !important;
+}
+
 /* ELAN Player
 ------------------------------------------------------------ */
 
@@ -69,7 +73,7 @@
 #query-api, #query-api-advanced {
 	cursor: pointer;
 	margin: 0 0 0 5px;
-	vertical-align: middle;
+	/*vertical-align: middle;*/
 }
 
 /* the category lists*/
@@ -123,47 +127,57 @@
     background: white url('/images/waiting.gif') right center no-repeat;
   }
 
-
-/* the query tabs */
- div.imdi-category-tabs {
-	background: transparent;
-	color: black;
-	border: none;
+.imdi-active-category {
+	text-decoration: underline;
 }
 
-.imdi-category-tabs .ui-state-active a, .ui-state-active a:link, .ui-state-active a:visited {
-	color: black;
+.imdi-category-tabs {
+	 background: transparent; 
+	border: none;
+
+}
+
+.imdi-category-tabs h2  {
+
 }
 
 .imdi-category-tabs .ui-widget-header { 
-    background: transparent; 
-    color: black;
+     background: transparent;  
     border: none; 
-    border-bottom: 1px solid #c0c0c0; 
+    border-bottom: 1px solid  #aaaaaa; 
     -moz-border-radius: 0px; 
     -webkit-border-radius: 0px; 
     border-radius: 0px; 
 } 
 
-.imdi-category-tabs .ui-widget-header a {
-	color: black;
-}
+.imdi-category-tabs .ui-tabs-nav {
 
-.ui-tabs .ui-tabs-nav .ui-tabs-anchor {
-	padding: 4px;
 }
 
 .imdi-category-tabs .ui-tabs-nav .ui-state-default {
-	background: transparent; 
-	color: black;
+	 background: transparent; 
 	border: none;
 }
 
 .imdi-category-tabs .ui-tabs-nav .ui-state-active {
- 	 background: transparent no-repeat bottom center; 
+	 background: transparent no-repeat bottom center; 
 	 border: none;
-	 color: black;
-	 text-decoration: underline;
+}
+
+.imdi-category-tabs .ui-tabs-nav li {
+	width: 17%;
+}
+
+.imdi-category-tabs .ui-tabs-nav li a {
+	 width: 99%;
+	 padding-left: 0 !important;
+	 padding-right: 0.5%;
+	 overflow: hidden;
+	 text-overflow: ellipsis;
+}
+
+.imdi-category-tabs .ui-tabs-nav img {
+	padding-right: 0.3em;
 }
 
 .imdi-category-tabs .ui-tabs-panel {
@@ -190,8 +204,26 @@ li.resource {
 	margin-left: 0;
 }
 
+
+/* Advanced Search */
+
+#imdi-advanced-search #constraint {
+	margin-bottom: 0.5em;
+}
+
+input#query-api-advanced {
+	margin-top: 2em;
+	margin-left: 0;
+}
+
+
 /* Plugin Results Area
 ------------------------------------------------------------ */
+
+div#results-area {
+	display: none;
+}
+
 
 /* one session result entry */
 div.imdi_session {
@@ -213,7 +245,7 @@ div.imdi_details  h2 {
 	 background: transparent; 
 	border: none;
 	float: right;
-	padding: 0 2em 2em 2em;
+	padding: 0 0em 2em 2em;
 	width: 45%;
 }
 
@@ -266,6 +298,14 @@ div.imdi_details  h2 {
 .map {
 	width: 300px;
 	height: 100px;
+}
+
+.imdi-open-imdi {
+	font-size: small;
+}
+
+.imdi-active-page {
+	text-decoration: underline;
 }
 
 /* Github Button Styling

@@ -1,16 +1,11 @@
 <!-- The area for listing the search results -->
 
-	<p>{{queryString}}</p>
+<p id="results">{{resultsTitle}}</p>
 
-	<!-- <div class="filter">
-		<b>Refine results</b>
-		{{# filter}}
-			{{# country}}
-				<p>{{ . }} ({{ count }})</p>
-			{{/ country}}
-		{{/ filter}}
-	</div> -->
-
+<div class="search-results">
 		{{# results }}
 			{{{ . }}}
 		{{/ results }}
+</div>
+
+{{{ pagelist }}}
