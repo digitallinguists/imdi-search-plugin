@@ -63,7 +63,7 @@ register_activation_hook(__FILE__, 'imdi_activation_hook');
 
 
 // Initialize mustache template engine
-require 'mustache.php/src/Mustache/Autoloader.php';
+require 'vendor/php/Mustache/Autoloader.php';
 Mustache_Autoloader::register();
 
 $m = NULL;
@@ -187,7 +187,7 @@ class IMDI_Search_Plugin {
 
 		/** history.js for legacy browser history control */
 
-		wp_register_script( 'history.js', plugins_url( '/history.js/scripts/bundled/html4+html5/jquery.history.js', __FILE__));
+		wp_register_script( 'history.js', plugins_url( '/vendor/js/jquery.history.js', __FILE__));
 
 		
 		/** responsive table styles */
