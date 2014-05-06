@@ -272,7 +272,8 @@ class IMDI_Search_Plugin {
 
 		$session_details = get_session_details($_GET["imdi_url"]);
 		$xpath = '/a:METATRANSCRIPT/a:Session/a:Resources/*/a:ResourceLink[contains(., "' . $_GET['filename'] . '")]/..';
-		$resource_elem = $session_details->xpath($xpath)[0];
+		$resource_elem = $session_details->xpath($xpath);
+		$resource_elem = $resource_elem[0];
 
 		$m = new Mustache_Engine(array(
     		'loader' => new Mustache_Loader_FilesystemLoader(dirname(__FILE__) . '/templates', array('extension' => '.html')),
@@ -568,24 +569,6 @@ class IMDI_Search_Plugin {
 		die();
 	}
 
-	public function ajax_make_media_thumbnail() {
-		//check_ajax_referer( 'imdi-archive-search-plugin-nonce', 'nonce' );
-
-		// only honour request for media on IMDI server 
-		$servlet_url = get_option($_opt_imdi_servlet_url);
-		$media_url = $_GET['src'];
-
-		if (!parse_url($servlet_url)['host'] == parse_url($media_url)['host'])
-			die("Forbidden source host");
-
-		switch ($_GET["format"]) {
-			case "image/jpeg":
-
-			break;
-			default:
-				die ("Unknown format");
-		}
-	}
 
 function ajax_toggle_save_session() {
 	// global $_opt_imdi_user_saved_session;
