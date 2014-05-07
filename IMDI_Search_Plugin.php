@@ -198,8 +198,8 @@ class IMDI_Search_Plugin {
 		wp_register_style('jquery-ui', plugins_url( '/vendor/css/imdi-theme/jquery-ui-1.10.4.custom.css', __FILE__ ));
 	
 /** register maps plugin */
-		wp_register_script( 'leaflet_maps', 'http://cdn.leafletjs.com/leaflet-0.7.2/leaflet.js');
-		wp_register_style( 'leaflet_maps', 'http://cdn.leafletjs.com/leaflet-0.7.2/leaflet.css');
+		wp_register_script( 'leaflet_maps', plugins_url('/vendor/js/leaflet.js', __FILE__));
+		wp_register_style( 'leaflet_maps', plugins_url('/vendor/css/leaflet.css', __FILE__));
 
 
 	}
@@ -456,7 +456,8 @@ class IMDI_Search_Plugin {
 		$request = wp_remote_get( 
 			$query_string,
 				array(
-				'timeout'	=> 200)
+				'timeout'	=> 200,
+				'sslverify' => false)
 				);
 
 		//echo($query_string);
@@ -513,24 +514,24 @@ class IMDI_Search_Plugin {
 			'path=' . $path . '&'.
 			'nodeid=MPI' . $query_topnode . '%23'; 
 	
-		// $request = wp_remote_get( 
-		// 	$query_string,
-		// 		array(
-		// 		'timeout'	=> 400)
-		// 		);
+		$request = wp_remote_get( 
+			$query_string,
+				array(
+				'timeout'	=> 400,
+				'sslverify' => false)
+				);
 
 		// //echo "<![CDATA[" . var_dump($request) . "]]>";
 
-		// $response_code 	= wp_remote_retrieve_response_code( $request );
-		// $response_body 	= wp_remote_retrieve_body( $request );
+		$response_code 	= wp_remote_retrieve_response_code( $request );
+		$response_body 	= wp_remote_retrieve_body( $request );
 	
 
-		$response = http_get($query_string);
-		$response_body = http_parse_message($response)->body;
+		// $response = http_get($query_string);
+		// $response_body = http_parse_message($response)->body;
 
 
 		$response_xml = simplexml_load_string( str_replace("&", "&amp;", $response_body));
-
 
 		//echo $response_body;
 		//echo $query_string;
@@ -1043,11 +1044,24 @@ function get_resource_icon($type) {
 
 function get_session_details($url)
 {
-	$body = http_parse_message(http_get($url))->body;
-    $xml = simplexml_load_string($body);
+
+		$request = wp_remote_get( 
+			$url,
+				array(
+				'timeout'	=> 400,
+				'sslverify' => false)
+				);
+
+		// //echo "<![CDATA[" . var_dump($request) . "]]>";
+
+		$response_code 	= wp_remote_retrieve_response_code( $request );
+		$response_body 	= wp_remote_retrieve_body( $request );
+
+    $xml = simplexml_load_string($response_body);
  
  	if (!$xml) {
  		echo "DETAILS FAILED ".$url;
+ 		//echo var_dump($request);
  	}
 
     $xml->RegisterXPathNamespace("a", "http://www.mpi.nl/IMDI/Schema/IMDI");
