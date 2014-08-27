@@ -599,9 +599,13 @@ function ajax_toggle_save_session() {
 			$item['href'] =  $item['href'].'&cat='.rawurlencode($title . "~~" . $item['name']);
 		}
 
+	$theTitle = $title;
+	if (function_exists("qtrans_useCurrentLanguageIfNotFoundUseDefaultLanguage")) 
+		$theTitle = qtrans_useCurrentLanguageIfNotFoundUseDefaultLanguage($title);
+
 	return $m->render('category',
 			array(
-				"category" =>  qtrans_useCurrentLanguageIfNotFoundUseDefaultLanguage($title),
+				"category" =>  $theTitle,
 				"occurrences" => $items
 	));
 }
