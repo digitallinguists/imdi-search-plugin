@@ -636,7 +636,6 @@ function ajax_toggle_save_session() {
             	if ($a['title'] == '') $a[title] = false; 
 	 
 
-
 	    	$a['project'] = $session_details->Session->MDGroup->Project->Name;
 
 	    	if ($a['project'] == '' ) $a['project'] = null;
@@ -659,11 +658,15 @@ function ajax_toggle_save_session() {
 	    		$a['address'] = $session_details->Session->MDGroup->Location->Address;
 	    	}
 
-	    	foreach ($session_details->Session->MDGroup->Content->Languages->children() as $language) {
-	    		if ($a['languages']) $a['languages'] .= ", "; 
-	    		$a['languages'] .= $language->Name;
-	    	}
-	    	if ($a['languages'] == ' ') $a['languages'] = null;
+		if ($session_details->Session->MDGroup->Content->Languages->children)
+		{
+	    		foreach ($session_details->Session->MDGroup->Content->Languages->children as $language) {
+	    			if ($a['languages']) $a['languages'] .= ", "; 
+	    			$a['languages'] .= $language->Name;
+	    		}
+	    	
+		}
+		if ($a['languages'] == ' ') $a['languages'] = null;
 
 
 
@@ -841,8 +844,10 @@ function generate_response_output ($xml) {
         {
 
  			$imdi_session_url = $one_match->url;
-
+			
  			$session_details = get_session_details($imdi_session_url);
+
+
 
  			$results[] = output_session($imdi_session_url, $one_match, $session_details);
  			//$filter = filter_parse($filter, $session_details);     	
@@ -1052,7 +1057,8 @@ function get_session_details($url)
 				'sslverify' => false)
 				);
 
-		// //echo "<![CDATA[" . var_dump($request) . "]]>";
+		#echo $url;
+		#echo "<![CDATA[" . var_dump($request) . "]]>"; die;
 
 		$response_code 	= wp_remote_retrieve_response_code( $request );
 		$response_body 	= wp_remote_retrieve_body( $request );
