@@ -120,11 +120,11 @@ code {
 /* waiting spinner gif shown while loading autocomplete entries in advanced search */
 
 .ui-autocomplete-loaded {
-	 background: white url('/images/waiting.gif') right center no-repeat;
+	 background: white url('images/waiting.gif') right center no-repeat;
 }
 
 .ui-autocomplete-loading {
-    background: white url('/images/waiting.gif') right center no-repeat;
+    background: white url('images/waiting.gif') right center no-repeat;
   }
 
 .imdi-active-category {

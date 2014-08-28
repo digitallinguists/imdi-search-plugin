@@ -632,7 +632,7 @@ function ajax_toggle_save_session() {
       
 	    	$a = array();
 	    	
-	    	$a['plugin_url'] = plugins_url('//IMDI-search-plugin//');
+	    	$a['plugin_url'] = plugin_dir_url( __FILE__ );
 
             $a['name'] = $session_details->Session->Name;
             $a['id'] = str_replace(' ', '', $session_details->Session->Name);
@@ -1026,7 +1026,7 @@ function get_access_image($imdi_resource_access_level) {
 		}
 
 	return array(
-		"src" => plugins_url() . "/IMDI-search-plugin/images/" . $image,
+		"src" => plugin_dir_url( __FILE__ ) . $image,
 		"text" => $text."/".$imdi_resource_access_level
 		);
 }
@@ -1048,7 +1048,7 @@ function get_resource_icon($type) {
 		default: $icon = "_blank.png";
 	}
 
-	return plugins_url() . "/IMDI-search-plugin/images/icons/" . $icon;
+	return plugin_dir_url( __FILE__ ) . "images/icons/" . $icon;
 }
 
 function get_session_details($url)
