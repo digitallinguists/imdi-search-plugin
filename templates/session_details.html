@@ -1,11 +1,13 @@
 <!-- display details about one session -->
 
-<div class="imdi_session">
+<div class="imdi_session {{ class }}">
+	{{# details}}
 	<div class="imdi_detailtabs">
 		<ul class="">
 			{{# country}}
 				<li class="imdi_infoCountry" title="{{ . }}"> 
 			 	<a href="#imdi_{{id}}_tabCountry"><img alt="Country" 
+	}
 src="{{plugin_url}}/images/map_marker-25.png" /> <span>{{ . }}</span></a></li>
 			 {{/country}}
 			{{# languages}}
@@ -39,12 +41,15 @@ src="{{plugin_url}}/images/map_marker-25.png" /> <span>{{ . }}</span></a></li>
 			</div>
 		{{/ project }}				
 	</div>
+	{{/ details }}
 	<div class="imdi_details">
 		{{# title }}
 			<h2>{{ . }}</h2>
 		{{/ title }}
 		{{^ title}}
+			{{# name }}
 			<h2>{{ name }}</h2>
+			{{/ name }}
 		{{/ title }}
 		<p>{{description}}</p>
 		<ul class="resources">
@@ -57,5 +62,10 @@ src="{{plugin_url}}/images/map_marker-25.png" /> <span>{{ . }}</span></a></li>
 			<input type="hidden" id="imdi_session_url" value="{{imdi_session_url}}" />
 		</div> -->
 	</div>
-	<span class="imdi-open-imdi"><a href="{{imdi-browser-link}}">{{trans.openInIMDIBrowser}}</a>
+	{{# imdi-browser-link}}
+	<span class="imdi-open-imdi"><a href="{{imdi-browser-link}}">{{trans.openInIMDIBrowser}}</a></span>&nbsp;&nbsp;
+	{{/ imdi-browser-link}}
+	{{# permalink}}
+	<span class="imdi-open-imdi"><a href="{{permalink}}">{{trans.permalink}}</a></span>
+	{{/ permalink}}
 </div>

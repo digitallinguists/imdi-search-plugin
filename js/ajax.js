@@ -130,17 +130,34 @@ var advancedsearch =  {group : [
 
 jQuery(document).ready(function($){
 
+	function stateFromUrl(url) {
+		var query_string = decodeURIComponent(getUrlVars(url)['query']);
+		var beginningAt = getUrlVars(url)['beginningAt'];
+		var cat = getUrlVars(url)['cat'];
+		var constraints = getUrlVars(url)['constraints']
+		return {
+			query: query_string,
+			beginningAt: beginningAt,
+			cat: cat,
+			constraints: constraints
+		};
+	}
+
+	function urlFromState(url) {
+		return "?" + $.param(url);
+	}
+
 	$( ".imdi-category-tabs" ).tabs({ collapsible: true });
 
 	if (History.enabled) {
 		if ($.isEmptyObject(History.getState().data)) {
-			if (_GET && _GET['query']) {
+			if ((typeof(_GET) != "undefined") && _GET && _GET['query']) {
 				History.replaceState(_GET);
 			}
 		}
 	}
 
-	if(_GET && _GET['query']) {
+	if((typeof(_GET) != "undefined") && _GET && _GET['query']) {
 		
 		// if request is not an advanced request and not a category, put the query into the keyword search textfield
 		// if ((decodeURIComponent(_GET['query']).substr(0, 2) != "a:") && (typeof _GET['cat'] != 'string'))
@@ -148,7 +165,18 @@ jQuery(document).ready(function($){
 		
 		prefill_values(_GET);
 
-		imdiRequest(getUrlVars(document.URL));
+		imdiRequest(_GET);
+	}
+
+	if((typeof(imdi_requests) != "undefined")) {
+		
+		(function req(i) {
+			if (i < imdi_requests.length) {
+				if (imdi_requests[i]['type'] == "query") imdiRequest(imdi_requests[i], i, req(i+1));
+				if (imdi_requests[i]['type'] == "nodes") imdiNodes(imdi_requests[i]['node_ids'], imdi_requests[i]['res_only'], i, req(i+1));
+			}
+		})(0);
+
 	}
 
 	for (var i in imdi_archive_search_plugin_object.categories) {
@@ -204,135 +232,214 @@ jQuery(document).ready(function($){
 	}
 	
 
-	if(_GET && _GET['cat'] && _GET['cat'].length > 0) {
+	if((typeof(_GET) != "undefined") && _GET && _GET['cat'] && _GET['cat'].length > 0) {
 		markCategory(_GET['cat']);
 	}
 
 	function category_link_onclick(e) {
 		if (History.enabled) {
 			e.preventDefault();
-			console.log(e);
-			var query_string = getUrlVars(e.target.parentNode.href)['query'];
-			markCategory(getUrlVars(e.target.parentNode.href)['cat']);
-			History.pushState({query: query_string, beginningAt: 0, cat: getUrlVars(e.target.parentNode.href)['cat']}, null, UpdateQueryString("query", query_string, UpdateQueryString("constraints", "", UpdateQueryString("cat", getUrlVars(e.target.parentNode.href)['cat']))));
+			// console.log(e);
+			// var query_string = getUrlVars(e.target.parentNode.href)['query'];
+			markCategory($.param(e.target.parentNode.href)['cat']);
+			state = stateFromUrl(e.target.parentNode.href);
+			History.pushState(state, null, urlFromState(state));
+
+		// 	History.pushState({
+		// 		query: query_string,
+		// 		beginningAt: 0,
+		// 		cat: getUrlVars(
+		// 			e.target.parentNode.href)['cat']
+		// 	},
+		// 			null,
+		// 			UpdateQueryString(
+		// 				"query",
+		// 				query_string,
+		// 				UpdateQueryString(
+		// 					"constraints",
+		// 					"",
+		// 					UpdateQueryString(
+		// 						"cat",
+		// 						getUrlVars(e.target.parentNode.href)['cat']
+		// 						)
+		// 					)
+		// 				)
+		// 			);
 		}	
 	}
 
 	function page_link_onclick(e) {
 		if (History.enabled) {
 			e.preventDefault();
-			var query_string = getUrlVars(e.target.href)['query'];
-			var beginningAt = getUrlVars(e.target.href)['beginningAt'];
-			var cat = getUrlVars(e.target.href)['cat'];
-			var state = {query: query_string, beginningAt: beginningAt, cat: cat};
-			alert(JSON.stringify(state) + " / " + e.target.href);
-			History.pushState(state, null, UpdateQueryString("query", query_string, UpdateQueryString("beginningAt", beginningAt)));
+			// var query_string = getUrlVars(e.target.href)['query'];
+			// var beginningAt = getUrlVars(e.target.href)['beginningAt'];
+			// var cat = getUrlVars(e.target.href)['cat'];
+			// var constraints = getUrlVars(e.target.href)['constraints']
+			// var state = {query: query_string, beginningAt: beginningAt, cat: cat, constraints: constraints};
+			
+			state = stateFromUrl(e.target.href);
+			History.pushState(state, null, urlFromState(state));
 		}	
 	}
 
 	$('#categories a').click(category_link_onclick);
 
 
+	function imdiNodes(node_ids, res_only, request_id, completion) {
+
+	 	var output_div =  typeof request_id == 'number' ? $("#results-area-" + request_id.toString()) : $("#results-area") 
+
+		$('#query-api').val(imdi_archive_search_plugin_object.searching);
+		$(output_div).show();
+
+		// Clear results area and show busy spinner
+		$(output_div).empty();
+		var busy_spinner = $('<span>').addClass('waiting').css('background-image', "url('" + imdi_archive_search_plugin_object.plugin_url + "images/waiting.gif')").appendTo(output_div);
+
+		var opts = {
+			url: imdi_archive_search_plugin_object.url,
+			type: 'GET',
+			async: true, 
+			cache: false,
+			dataType: 'json',
+			data: {
+				action: 'IMDI_get_nodes',
+				nonce: imdi_archive_search_plugin_object.nonce,
+				node_ids: node_ids,
+				res_only: res_only
+			},
+			success: function(response) {
+				$(output_div).append(response.html);
+
+				$(busy_spinner).remove();
+
+				if (typeof(completion) != "undefined") completion();
+
+
+			},
+			error: function(xhr, textStatus ,e) {
+
+				$(busy_spinner).remove();
+
+				$(output_div).append('<p class="plugin-error">ERROR: no results, param were: ' + node_ids + '<div>' + xhr.responseText + '</div></p>');
+
+				if (typeof(completion) != "undefined") completion();
+
+			}
+		}
+
+		$.ajax(opts);
+	}
+
 	/**
 	 * Perform the AJAX request when the user clicks the search button.
 	 */
 
-	 function imdiRequest(params) {
+	 function imdiRequest(params, request_id, completion) {
+
+	 	var output_div =  typeof request_id == 'number' ? $("#results-area-" + request_id.toString()) : $("#results-area") 
 
 		/** Output a message and loading icon */
 		var default_text = $('#query-api').val();
 		$('#query-api').val(imdi_archive_search_plugin_object.searching);
-		$('div#results-area').show();
+		$(output_div).show();
 
 		// Clear results area and show busy spinner
-		$('#results-area').empty();
-		$('<span>').addClass('waiting').css('background-image', "url('" + imdi_archive_search_plugin_object.plugin_url + "images/waiting.gif')").appendTo('#results-area');
+		$(output_div).empty();
+		var busy_spinner = $('<span>').addClass('waiting').css('background-image', "url('" + imdi_archive_search_plugin_object.plugin_url + "images/waiting.gif')").appendTo(output_div);
 
 
 		/* Jump to results */
 
-		if (!$("span.waiting").isOnScreen())
-			$(document).scrollTop( $("span.waiting").offset().top );  
-
-
+		// if (!$(busy_spinner).isOnScreen())
+		// 	$(document).scrollTop( $(busy_spinner).offset().top );  
 
 		/** Setup our AJAX request */
+
+
 		var opts = {
-			url: imdi_archive_search_plugin_object.url,
-			type: 'GET',
-			async: true,
-			cache: false,
-			dataType: 'json',
-			data: {
-				action: 'search_IMDI_archive',
-				nonce: imdi_archive_search_plugin_object.nonce,
-				query: params['query'],
-				beginningAt:  params['beginningAt'] ? params['beginningAt'] : 0,
-				cat: params['cat'] ? params['cat'] : "",
-				constraints: params['constraints'] ? params['constraints'] : ""
-			},
-			success: function(response){
+				url: imdi_archive_search_plugin_object.url,
+				type: 'GET',
+				async: true,
+				cache: false,
+				dataType: 'json',
+				data: {
+					action: 'search_IMDI_archive',
+					nonce: imdi_archive_search_plugin_object.nonce,
+					query: params['query'],
+					beginningAt:  params['beginningAt'] ? params['beginningAt'] : 0,
+					limit: params['limit'] ? params['limit'] : "",
+					cat: params['cat'] ? params['cat'] : "",
+					constraints: params['constraints'] ? params['constraints'] : "",
+					details: params['details'] 
+				},
+				success: function(response){
 
 
-				/** Make sure to remove any previous error messages or data if we have any and append our data */
+					/** Make sure to remove any previous error messages or data if we have any and append our data */
 
-				$('#results-area').append(response.html);
+					$(output_div).append(response.html);
 
-				$('#imdi-pageindex a').click(page_link_onclick);
+					$('#imdi-pageindex a').click(page_link_onclick);
 
 
-				jQuery(".imdi_detailtabs").each(function(){jQuery(this).tabs(
-					{
-						collapsible: true,
-						active: false,
-						activate: function(event, ui) {
-							if ($(ui.newTab[0]) && $(ui.newTab[0]).hasClass("imdi_infoCountry")) {
-								if (L) {
-									var countryName = $(ui.newTab[0]).children('a').text();
-									// if we have leaflet.js (a map library), look up the country
-									$.getJSON("http://open.mapquestapi.com/nominatim/v1/search.php?format=json&q=" + countryName, function(data) {
+					jQuery(".imdi_detailtabs").each(function(){jQuery(this).tabs(
+						{
+							collapsible: true,
+							active: false,
+							activate: function(event, ui) {
+								if ($(ui.newTab[0]) && $(ui.newTab[0]).hasClass("imdi_infoCountry")) {
+									if (L) {
+										var countryName = $(ui.newTab[0]).children('a').text();
+										// if we have leaflet.js (a map library), look up the country
+										$.getJSON("http://open.mapquestapi.com/nominatim/v1/search.php?format=json&q=" + countryName, function(data) {
 
-										// if we have coordinates, display the map
-										if (data.length >= 1 && !data.error) {
-											var map = L.map($($(ui.newPanel[0]).children('.map')[0]).attr('id')).setView([data[0].lat, data[0].lon], 3);
-											L.tileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-		    									attribution: 'Map &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>',
-		    									maxZoom: 18
-											}).addTo(map);
-											var marker = L.marker([data[0].lat, data[0].lon]).addTo(map);
-										}
+											// if we have coordinates, display the map
+											if (data.length >= 1 && !data.error) {
+												var map = L.map($($(ui.newPanel[0]).children('.map')[0]).attr('id')).setView([data[0].lat, data[0].lon], 3);
+												L.tileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+			    									attribution: 'Map &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>',
+			    									maxZoom: 18
+												}).addTo(map);
+												var marker = L.marker([data[0].lat, data[0].lon]).addTo(map);
+											}
 
-						
-									})
-									
+							
+										})
+										
+									}
 								}
 							}
-						}
-					})
-				});
+						})
+					});
 
 				/** Remove the loading icon and replace the button with default text */
-				$('.waiting').remove();
+				$(busy_spinner).remove();
 				$('#query-api').val(default_text);
+
+				if (typeof(completion) != "undefined") completion();
 			},
 			error: function(xhr, textStatus ,e) {
 				/** Make sure to remove any previous error messages or data if we have any */
-				$('.search-results').empty();
+				$(output_div).empty();
 				
 				/** If we have a response as to why our request didn't work, let's output it or give a default error message */
 				if ( xhr.responseText )
-					$('.search-results').append('<p class="plugin-error">' + xhr.responseText + '</p>');
+					$(output_div).append('<p class="plugin-error">' + xhr.responseText + '</p>');
 				else
-					$('.search-results').append('<p class="plugin-error">' + imdi_archive_search_plugin_object.error + '</p>');
+					$(output_div).append('<p class="plugin-error">' + imdi_archive_search_plugin_object.error + '</p>');
 					
 				/** Remove the loading icon and replace the button with default text */
-				$('.waiting').remove();
+				$(busy_spinner).remove();
 				$('#query-api').val(default_text);
+
+				if (typeof(completion) != "undefined") completion();
 			}
-		}
+		
+	}
 		
 		/** Process our actual AJAX request */
-		$.ajax(opts);;
+		$.ajax(opts);
 	 }
 
 	 function occurrencesRequest(dummyDiv, path, name) {
@@ -341,7 +448,7 @@ jQuery(document).ready(function($){
 		var opts = {
 			url: imdi_archive_search_plugin_object.url,
 			type: 'GET',
-			async: false, 
+			async: true, 
 			cache: false,
 			dataType: 'json',
 			data: {
@@ -428,7 +535,9 @@ jQuery(document).ready(function($){
 		var History = window.History;
 
 		if (History.enabled) {
-			History.pushState({query: query_value, beginningAt: 0}, null, UpdateQueryString("query", query_value, UpdateQueryString("constraints", "", UpdateQueryString("cat", "", UpdateQueryString("beginningAt", "0")))));
+			var state = {query: query_value, beginningAt: 0};
+
+			History.pushState(state, null, urlFromState(state));
 		}
 		else imdiRequest({query: query_value});
 
@@ -455,12 +564,13 @@ jQuery(document).ready(function($){
 			counter++;
 		}); 
 
-		query_value = imdiURLEncode(query_value);
+		//query_value = imdiURLEncode(query_value);
 
 		var History = window.History;
 
 		if (History.enabled) {
-			History.pushState({query: query_value, constraints: constraints, beginningAt: 0}, null, UpdateQueryString("query", query_value, UpdateQueryString("constraints",  encodeURIComponent(JSON.stringify(constraints), UpdateQueryString("cat", "", UpdateQueryString("beginningAt", "0"))))));
+			var state = {query: query_value, constraints: constraints, beginningAt: 0};
+			History.pushState(state, null, urlFromState(state));
 		}
 		else imdiRequest({query: query_value});
 

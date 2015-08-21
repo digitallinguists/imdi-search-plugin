@@ -105,10 +105,12 @@ function get_resource_info() {
 		global $wp_query;
 
 		if ($imdi_resource_node_info == NULL) {
+			echo $wp_query->query_vars['node'];
 			if ((substr($wp_query->query_vars['node'], 0,3) == "MPI") && (substr($wp_query->query_vars['node'], -3) != "%23"))
 				$wp_query->query_vars['node'] .= "%23";
 
 			$node = get_node_info(urldecode($wp_query->query_vars['node']));
+			var_dump($node);
 			$parent = get_node_info($node['node.parents'][0]);
 
 			$imdi_resource_node_info = Array(
