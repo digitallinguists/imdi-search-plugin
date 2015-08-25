@@ -591,8 +591,10 @@ class IMDI_Search_Plugin {
 	    $access = is_accessible($node['node']);
 
 	    $type = imdi_get_resource_type($node['node']['node.mimetype']);
+	    $title = $session_details->Session->MDGroup->Project->Title;
 		$standard_params = array(
-					'project' =>  $session_details->Session->MDGroup->Project->Title,
+					'project' =>  $title,
+					'project_class' => str_replace(' ', '_', $title),
 					'country' => $session_details->Session->MDGroup->Location->Country,
 					'languages' => $languages,
 					'session_desc' => $session_details->Session->Description,
