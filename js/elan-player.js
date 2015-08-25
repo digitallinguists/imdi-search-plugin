@@ -221,15 +221,20 @@ if (typeof(imdi_elan_player_object) != 'undefined') {
             scrollParent: false
         });
 
-         elan.init({
-            url: imdi_elan_player_object.eaf_url,
-            container: '#annotations',
-            // tiers: {
-            //     "W-IPA": true,
-            //     "W-RGMe": true
-            // }
-        });
+        var have_annotations = document.getElementById('annotations')? true : false;
 
+        if (have_annotations) {
+
+             elan.init({
+                url: imdi_elan_player_object.eaf_url,
+                container: '#annotations',
+                // tiers: {
+                //     "W-IPA": true,
+                //     "W-RGMe": true
+                // }
+            });
+
+        }
         timeline.init({
             wavesurfer: wavesurfer,
             container: "#wave-timeline"
@@ -335,43 +340,45 @@ if (typeof(imdi_elan_player_object) != 'undefined') {
             $('#play').show();
         });
 
-        var prevAnnotation, prevRow, region;
-        var onProgress = function (time) {
-            var annotation = elan.getRenderedAnnotation(time);
+        if (have_annotations) {
+            var prevAnnotation, prevRow, region;
+            var onProgress = function (time) {
+                var annotation = elan.getRenderedAnnotation(time);
 
-            if (prevAnnotation != annotation) {
-                prevAnnotation = annotation;
+                if (prevAnnotation != annotation) {
+                    prevAnnotation = annotation;
 
-                region && region.remove();
-                region = null;
+                    region && region.remove();
+                    region = null;
 
-                if (annotation) {
-                    // Highlight annotation table row
-                    var row = elan.getAnnotationNode(annotation);
-                    prevRow && prevRow.classList.remove('success');
-                    prevRow = row;
-                    row.classList.add('success');
-                    var before = row.previousSibling;
-                    if (before) {
-                        //elan.container.scrollTop = before.offsetTop;
-                        //$('table.wavesurfer-annotations').parent().offset(before.offsetTop);
-                        $('.dataTables_scrollBody').animate({
-                            scrollTop: before.offsetTop
-                        }, 800)
+                    if (annotation) {
+                        // Highlight annotation table row
+                        var row = elan.getAnnotationNode(annotation);
+                        prevRow && prevRow.classList.remove('success');
+                        prevRow = row;
+                        row.classList.add('success');
+                        var before = row.previousSibling;
+                        if (before) {
+                            //elan.container.scrollTop = before.offsetTop;
+                            //$('table.wavesurfer-annotations').parent().offset(before.offsetTop);
+                            $('.dataTables_scrollBody').animate({
+                                scrollTop: before.offsetTop
+                            }, 800)
+                        }
+
+                        // Region
+                        region = wavesurfer.addRegion({
+                            start: annotation.start,
+                            end: annotation.end,
+                            resize: false,
+                            color: 'rgba(223, 240, 216, 0.7)'
+                        });
                     }
-
-                    // Region
-                    region = wavesurfer.addRegion({
-                        start: annotation.start,
-                        end: annotation.end,
-                        resize: false,
-                        color: 'rgba(223, 240, 216, 0.7)'
-                    });
                 }
-            }
-        };
+            };
 
-        wavesurfer.on('audioprocess', onProgress);
+            wavesurfer.on('audioprocess', onProgress);
+        }
 
     }
     }

@@ -44,6 +44,20 @@
 		</div>
 	{{/ eaf }}
 
+	{{# wav }}
+		<div class="imdi-elan">
+			<h3>{{ trans.preview }}</h3>
+			<div class="imdi-elan">
+			<div id="wave"><div id="progress-bar"></div><div id="kickoff-overlay"><p style="z-index:200;"><a href="#">&#9654; Load Audio</a></p></div></div>
+			<div id="wave-timeline"></div>
+			</div>
+			<div id="zoomin"><a href="" class="fa fa-search-plus"></a></div>
+			<div id="zoomout"><a class="fa fa-search-minus"><a href=""></a></div>
+			<div id="play"><a href="">&#9654; {{trans.play}}</a></div>
+			<div id="pause"><a href="">&#8214; {{trans.pause}}</a></div>
+		</div>
+	{{/ wav }}
+
 	{{# audio }}
 		<h3>{{ trans.preview }}</h3>
 		[jwplayer config="Player" file="{{filename}}"]

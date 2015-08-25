@@ -655,6 +655,7 @@ class IMDI_Search_Plugin {
 
 
 			case "eaf":
+			case "wav":
 				
 				wp_enqueue_script('wavesurfer');
 				wp_enqueue_script('wavesurfer-elan');
@@ -1487,7 +1488,8 @@ function imdi_get_resource_type($mime) {
 	switch($mime) {
 
 			case "text/x-eaf+xml": return "eaf";
-			case "application/pdf": return "pdf";	
+			case "application/pdf": return "pdf";
+			case "audio/x-wav": return "wav";	
 			case (preg_match('/^text/', $mime) ? true : false): return "text";
 			case (preg_match('/^audio/', $mime) ? true : false): return "audio";
 			case (preg_match('/^image/', $mime) ? true : false): return "image";
